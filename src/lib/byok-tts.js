@@ -740,7 +740,21 @@ Zotero.BYOKTTS = new function () {
 				}
 				let names = match.supported_voices || [];
 				if (!names.length) {
-					throw new Error(`OpenRouter lists no voices for "${wanted}" — enter them by hand.`);
+					// Some providers take reference audio or a custom voice id instead of publishing a
+					// catalogue, so there is genuinely nothing to list. Naming the models that do
+					// saves working that out one model at a time.
+					let withVoices = models
+						.filter(m => (m.supported_voices || []).length)
+						.map(m => `${m.id} (${m.supported_voices.length})`);
+					throw new Error(
+						`OpenRouter publishes no voice list for "${wanted}" — this model takes a voice `
+						+ 'id or reference audio of your own, so enter one by hand.'
+						+ (withVoices.length
+							? '
+
+Models that do publish voices: ' + withVoices.join(', ')
+							: '')
+					);
 				}
 				return names.map(id => ({
 					id,

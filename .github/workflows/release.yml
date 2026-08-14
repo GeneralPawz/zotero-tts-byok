@@ -17,6 +17,21 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Refuse to release from outside main
+        shell: bash
+        run: |
+          # Releases come from the stable branch only. Work lands on dev, is tested, and is
+          # merged to main before it is ever tagged — so a tag on dev is a mistake, and one
+          # that would otherwise ship straight to every install through update.json.
+          git fetch --quiet origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF_NAME is not on main; merge to main before tagging."
+            exit 1
+          fi
+          echo "tag is on main"
 
       - uses: actions/setup-node@v4
         with:
