@@ -16,8 +16,12 @@ $version = $manifest.version
 $stage = Join-Path ([System.IO.Path]::GetTempPath()) ("byok-stage-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Force $stage | Out-Null
 try {
-	Get-ChildItem $PSScriptRoot -File |
-		Where-Object { $_.Extension -notin '.xpi', '.jsonl' -and $_.Name -ne 'build.ps1' } |
+	Get-ChildItem $PSScriptRoot -File -Force |
+		Where-Object {
+			$_.Extension -notin '.xpi', '.jsonl' -and
+			$_.Name -ne 'build.ps1' -and
+			-not $_.Name.StartsWith('.')
+		} |
 		Copy-Item -Destination $stage
 
 	if (Test-Path $OutFile) { Remove-Item $OutFile -Force }
