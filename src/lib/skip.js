@@ -121,6 +121,22 @@ Zotero.BYOKTTS.Skip = new function () {
 	/* ------------------------------------------------------------ text rules */
 
 	/**
+	 * Tags the reader must keep even when bracketed text is being dropped: the performance
+	 * tags a document uses, and any speaker names in use. Without this, turning on "Text in [ ]"
+	 * quietly removes every [whispering] before it ever reaches the provider.
+	 */
+	this._protectedTags = function () {
+		let api = Zotero.BYOKTTS;
+		let tags = new Set((api.emotionTags ? api.emotionTags() : []).map(t => t.toLowerCase()));
+		for (let tag of api.speakerTags ? api.speakerTags() : []) tags.add(tag);
+		return tags;
+	};
+
+	this.isProtectedTag = function (inner) {
+		return this._protectedTags().has(String(inner).trim().toLowerCase());
+	};
+
+	/**
 	 * Remove balanced delimiter pairs, including nested ones — a regex cannot do this, and
 	 * "(see Fig. 2 (right))" is common enough to matter.
 	 */
@@ -172,14 +188,36 @@ Zotero.BYOKTTS.Skip = new function () {
 			.trim();
 	};
 
+	/**
+	 * Take the recognised [tags] out of harm's way, run the bracket rules, then put them back.
+	 * The placeholder carries no brackets, so nothing downstream can match it.
+	 */
+	this._withTagsPreserved = function (text, work) {
+		let protectedTags = this._protectedTags();
+		if (!protectedTags.size) return work(text);
+		let stash = [];
+		// A private-use character delimits the placeholder: not whitespace, not a letter and
+		// not punctuation, so no rule and no spacing tidy-up can see or disturb it. Written as
+		// an escape sequence so this file stays plain text.
+		let masked = String(text).replace(/\[([^\]]+)\]/g, (whole, inner) => {
+			if (!protectedTags.has(inner.trim().toLowerCase())) return whole;
+			stash.push(whole);
+			return `\uE000${stash.length - 1}\uE000`;
+		});
+		if (!stash.length) return work(text);
+		return work(masked).replace(/\uE000(\d+)\uE000/g, (_, i) => stash[Number(i)]);
+	};
+
 	this.filterText = function (text) {
-		let out = String(text);
-		if (this.isOn('urls')) out = this._stripURLs(out);
-		if (this.isOn('citations')) out = this._stripCitations(out);
-		if (this.isOn('parens')) out = this._stripPairs(out, '(', ')');
-		if (this.isOn('brackets')) out = this._stripPairs(out, '[', ']');
-		if (this.isOn('braces')) out = this._stripPairs(out, '{', '}');
-		return this._tidy(out);
+		return this._withTagsPreserved(text, (input) => {
+			let out = String(input);
+			if (this.isOn('urls')) out = this._stripURLs(out);
+			if (this.isOn('citations')) out = this._stripCitations(out);
+			if (this.isOn('parens')) out = this._stripPairs(out, '(', ')');
+			if (this.isOn('brackets')) out = this._stripPairs(out, '[', ']');
+			if (this.isOn('braces')) out = this._stripPairs(out, '{', '}');
+			return this._tidy(out);
+		});
 	};
 
 	/* ------------------------------------------------- content-shape rules */

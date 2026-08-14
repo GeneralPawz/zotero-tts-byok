@@ -192,7 +192,9 @@
 
 		<hbox align="center">
 			<label data-l10n-id="byok-emotion-label" control="byok-emotion-picker"/>
-			<html:select id="byok-emotion-picker" class="byok-emotion-picker"/>
+			<menulist id="byok-emotion-picker" native="true">
+				<menupopup id="byok-emotion-popup"/>
+			</menulist>
 		</hbox>
 		<description class="byok-hint" data-l10n-id="byok-emotion-hint"/>
 
@@ -214,6 +216,24 @@
 				preference="extensions.zotero.byokTTS.extraBody"/>
 		</vbox>
 		<description class="byok-hint" data-l10n-id="byok-extra-body-hint"/>
+	</groupbox>
+
+	<groupbox>
+		<label><html:h2 data-l10n-id="byok-speakers-heading"/></label>
+		<description class="byok-hint" data-l10n-id="byok-speakers-hint"/>
+
+		<html:div class="byok-speaker-row byok-voice-head">
+			<html:span data-l10n-id="byok-speakers-col-tag"/>
+			<html:span data-l10n-id="byok-speakers-col-voice"/>
+			<html:span/>
+		</html:div>
+		<vbox id="byok-speakers-rows"/>
+		<description id="byok-speakers-empty" class="byok-hint"
+			data-l10n-id="byok-speakers-empty"/>
+		<hbox>
+			<button id="byok-speakers-add" data-l10n-id="byok-speakers-add"
+				oncommand="Zotero.BYOKTTS.pane.addSpeaker()"/>
+		</hbox>
 	</groupbox>
 
 	<groupbox>

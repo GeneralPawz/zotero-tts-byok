@@ -36,7 +36,12 @@ for (let m of js.matchAll(/setAttributes\([^)]*\?\s*'([^']+)'\s*:\s*'([^']+)'/g)
 	that the string exist, since this set also sweeps up element ids and class names.
 */
 const referenced = new Set(used);
-for (let m of js.matchAll(/'(byok-[a-zA-Z0-9-]+)'/g)) referenced.add(m[1]);
+const scripts = [js, ...fs.readdirSync(path.join(ROOT, 'src/lib'))
+	.filter(name => name.endsWith('.js'))
+	.map(name => fs.readFileSync(path.join(ROOT, 'src/lib', name), 'utf8'))];
+for (let source of scripts) {
+	for (let m of source.matchAll(/'(byok-[a-zA-Z0-9-]+)'/g)) referenced.add(m[1]);
+}
 
 /* Parse each locale */
 function parseFtl(file) {

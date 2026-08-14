@@ -247,6 +247,24 @@ the brackets do.
 | Displeasure | `[annoyed]`, `[bitter]`, `[angry]`, `[hostile]`, `[disgusted]` |
 | Delivery | `[whispering]` |
 
+### Speakers
+
+A line beginning with a configured speaker tag is spoken by that character's voice, and the tag
+itself is not read out:
+
+```
+[Mara] [angry] “THEO?!”
+[Theo] [silly] “Would you believe I’m a highly trained pastry inspector?”
+```
+
+Set the tags under **Speakers** in the settings, each pointing at one of your voices — a female
+voice for Mara, a male one for Theo. Narration, having no tag, stays on the voice chosen in the
+reader. Speaker and emotion tags combine; the speaker tag has to come first.
+
+Automatic speaker detection is not attempted. Attribution in prose is genuinely ambiguous —
+consecutive lines by one character, unattributed replies — and guessing wrong is worse than not
+guessing, so the tags are explicit.
+
 There is a document for trying them. `test/fixtures/speaking-test.txt` is a short scene that uses
 every tag above at least once, and
 
@@ -255,7 +273,12 @@ node scripts/make-speaking-test.mjs
 ```
 
 turns it into `target/speaking-test.pdf`. Add that to Zotero and read it aloud to hear how a voice
-handles the whole set in context, rather than one tag at a time in the prompt box.
+handles the whole set in context, rather than one tag at a time in the prompt box. The scene is
+also tagged for two speakers, so configuring `Mara` and `Theo` demonstrates the voice switching.
+
+Note that the tags are bracketed, and the **Text in [ ]** skip rule would otherwise strip them
+before synthesis — which is why recognised emotion and speaker tags are held back from that rule.
+An unrecognised bracket is still dropped as before.
 
 Tags apply from where they appear until the mood shifts, so they can be mixed inside one passage:
 

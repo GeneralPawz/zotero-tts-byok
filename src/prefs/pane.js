@@ -75,6 +75,7 @@ var Zotero_BYOK_TTS = {
 
 		this.bindVoiceEditor();
 		this.bindControls();
+		this.renderSpeakerRows();
 		await this.buildEmotionPicker();
 		this.onProviderChange(true);
 		this.refreshLogPath();
@@ -235,37 +236,41 @@ var Zotero_BYOK_TTS = {
 		let chosenVoice = this.getPref('test.voice') || '';
 		let chosenLocale = this.getPref('test.locale') || '';
 
-		let header = (id) => {
-			let item = document.createXULElement('menuitem');
-			document.l10n.setAttributes(item, id);
-			item.setAttribute('disabled', 'true');
-			popup.append(item);
+		let submenu = (id) => {
+			let menu = document.createXULElement('menu');
+			document.l10n.setAttributes(menu, id);
+			let child = document.createXULElement('menupopup');
+			menu.append(child);
+			popup.append(menu);
+			return child;
 		};
-		let option = (label, checked, onCommand) => {
+		let option = (label, checked, onCommand, parent) => {
 			let item = document.createXULElement('menuitem');
 			item.setAttribute('type', 'radio');
 			item.setAttribute('label', label);
 			if (checked) item.setAttribute('checked', 'true');
 			item.addEventListener('command', onCommand);
-			popup.append(item);
+			(parent || popup).append(item);
 			return item;
 		};
 
-		header('byok-test-menu-voice');
+		// Voices and languages go into submenus — a provider list can run to ninety entries,
+		// which as one flat menu is taller than the screen
+		let voiceMenu = submenu('byok-test-menu-voice');
 		option(await this.msg('byok-test-menu-first'), !chosenVoice,
-			() => this.setPref('test.voice', ''));
+			() => this.setPref('test.voice', ''), voiceMenu);
 		for (let voice of voices) {
 			option(voice.label || voice.id, chosenVoice === voice.id,
-				() => this.setPref('test.voice', voice.id));
+				() => this.setPref('test.voice', voice.id), voiceMenu);
 		}
 
-		popup.append(document.createXULElement('menuseparator'));
-		header('byok-test-menu-language');
+		let languageMenu = submenu('byok-test-menu-language');
 		let locales = [...new Set(voices.flatMap(v => v.locales || []))];
 		option(await this.msg('byok-test-menu-voice-default'), !chosenLocale,
-			() => this.setPref('test.locale', ''));
+			() => this.setPref('test.locale', ''), languageMenu);
 		for (let locale of locales) {
-			option(locale, chosenLocale === locale, () => this.setPref('test.locale', locale));
+			option(locale, chosenLocale === locale,
+				() => this.setPref('test.locale', locale), languageMenu);
 		}
 
 		popup.append(document.createXULElement('menuseparator'));
@@ -290,43 +295,50 @@ var Zotero_BYOK_TTS = {
 	/* ------------------------------------------------------- speaking style */
 
 	/**
-	 * Tags that have been tried and behave. They are English words the model reads as direction
-	 * rather than speaking, so the text is never translated — only the group headings are.
+	 * Tags that have been tried and behave, taken from the plugin so the skip rules and this
+	 * picker cannot drift apart. They are English words the model reads as direction rather
+	 * than speaking, so the text is never translated — only the group headings are.
 	 */
-	EMOTIONS: [
-		['byok-emotion-group-amusement', ['laughing', 'silly', 'hysterical']],
-		['byok-emotion-group-joy', ['joyful', 'delighted', 'thrilled', 'ecstatic']],
-		['byok-emotion-group-yearning', ['longing', 'lust']],
-		['byok-emotion-group-surprise', ['surprised', 'startled', 'flabbergasted']],
-		['byok-emotion-group-displeasure', ['annoyed', 'bitter', 'angry', 'hostile', 'disgusted']],
-		['byok-emotion-group-delivery', ['whispering']]
-	],
+	get EMOTIONS() {
+		return Zotero.BYOKTTS.EMOTIONS || [];
+	},
 
+	/**
+	 * A XUL menulist, not an html:select — the HTML control renders as a flat grey box in the
+	 * preferences window and looks nothing like the menus beside it. XUL has no optgroup, so
+	 * disabled items stand in as group headings.
+	 */
 	async buildEmotionPicker() {
-		let select = document.getElementById('byok-emotion-picker');
-		if (!select) return;
-		select.replaceChildren();
+		let popup = document.getElementById('byok-emotion-popup');
+		let list = document.getElementById('byok-emotion-picker');
+		if (!popup || !list) return;
+		popup.replaceChildren();
 
-		let placeholder = document.createElement('option');
-		placeholder.value = '';
-		placeholder.textContent = await this.msg('byok-emotion-placeholder');
-		select.append(placeholder);
+		let placeholder = document.createXULElement('menuitem');
+		placeholder.setAttribute('value', '');
+		placeholder.setAttribute('label', await this.msg('byok-emotion-placeholder'));
+		popup.append(placeholder);
 
 		for (let [groupId, tags] of this.EMOTIONS) {
-			let group = document.createElement('optgroup');
-			group.label = await this.msg(groupId);
+			popup.append(document.createXULElement('menuseparator'));
+			let heading = document.createXULElement('menuitem');
+			heading.setAttribute('label', await this.msg(groupId));
+			heading.setAttribute('disabled', 'true');
+			heading.classList.add('byok-menu-heading');
+			popup.append(heading);
 			for (let tag of tags) {
-				let option = document.createElement('option');
-				option.value = `[${tag}]`;
-				option.textContent = `[${tag}]`;
-				group.append(option);
+				let item = document.createXULElement('menuitem');
+				item.setAttribute('value', `[${tag}]`);
+				item.setAttribute('label', `[${tag}]`);
+				popup.append(item);
 			}
-			select.append(group);
 		}
 
-		select.addEventListener('change', () => {
-			if (select.value) this.insertStyleTag(select.value);
-			select.selectedIndex = 0;
+		list.selectedIndex = 0;
+		list.addEventListener('command', () => {
+			let chosen = list.value;
+			if (chosen) this.insertStyleTag(chosen);
+			list.selectedIndex = 0;
 		});
 	},
 
@@ -350,6 +362,88 @@ var Zotero_BYOK_TTS = {
 		area.focus();
 	},
 
+	/* ----------------------------------------------------------- speakers */
+
+	readSpeakers() {
+		try {
+			let parsed = JSON.parse(this.getPref('speakers') || '[]');
+			return Array.isArray(parsed) ? parsed : [];
+		}
+		catch (e) {
+			return [];
+		}
+	},
+
+	writeSpeakers(speakers) {
+		this.setPref('speakers', JSON.stringify(speakers));
+		this.renderSpeakerRows();
+	},
+
+	renderSpeakerRows() {
+		let host = document.getElementById('byok-speakers-rows');
+		let empty = document.getElementById('byok-speakers-empty');
+		if (!host) return;
+		let speakers = this.readSpeakers();
+		let voices = Zotero.BYOKTTS.getVoices();
+		host.replaceChildren();
+		if (empty) empty.hidden = speakers.length > 0;
+
+		speakers.forEach((speaker, index) => {
+			let row = document.createElement('div');
+			row.className = 'byok-speaker-row';
+
+			let tag = document.createElement('input');
+			tag.type = 'text';
+			tag.value = speaker.tag || '';
+			tag.placeholder = 'Mara';
+			tag.addEventListener('change', () => {
+				let all = this.readSpeakers();
+				all[index] = Object.assign({}, all[index], { tag: tag.value.trim() });
+				this.writeSpeakers(all);
+			});
+
+			// A menulist rather than free text: the voice has to exist to be usable
+			let picker = document.createXULElement('menulist');
+			picker.setAttribute('native', 'true');
+			let popup = document.createXULElement('menupopup');
+			for (let voice of voices) {
+				let item = document.createXULElement('menuitem');
+				item.setAttribute('value', voice.id);
+				item.setAttribute('label', voice.label || voice.id);
+				popup.append(item);
+			}
+			picker.append(popup);
+			picker.addEventListener('command', () => {
+				let all = this.readSpeakers();
+				all[index] = Object.assign({}, all[index], { voice: picker.value });
+				this.writeSpeakers(all);
+			});
+
+			let remove = document.createElement('button');
+			remove.type = 'button';
+			remove.className = 'byok-voice-remove';
+			remove.textContent = '✕';
+			document.l10n.setAttributes(remove, 'byok-voices-remove');
+			remove.addEventListener('click', () => {
+				let all = this.readSpeakers();
+				all.splice(index, 1);
+				this.writeSpeakers(all);
+			});
+
+			row.append(tag, picker, remove);
+			host.append(row);
+			// Set after insertion, or the menulist has no items to match against yet
+			picker.value = speaker.voice || (voices[0] && voices[0].id) || '';
+		});
+	},
+
+	addSpeaker() {
+		let voices = Zotero.BYOKTTS.getVoices();
+		let speakers = this.readSpeakers();
+		speakers.push({ tag: '', voice: (voices[0] && voices[0].id) || '' });
+		this.writeSpeakers(speakers);
+	},
+
 	/* ------------------------------------------------------------- voices */
 
 	readVoices() {
@@ -366,6 +460,8 @@ var Zotero_BYOK_TTS = {
 		this.setPref('voices', JSON.stringify(voices, null, 2));
 		this.renderVoiceRows();
 		this.renderHighlight();
+		// The speaker rows pick their voice from this list
+		this.renderSpeakerRows();
 	},
 
 	/**
@@ -384,6 +480,12 @@ var Zotero_BYOK_TTS = {
 		on('byok-provider', () => this.onProviderChange());
 		on('byok-format', () => this.updateVisibility());
 		on('byok-voices-view', () => this.updateVoicesView());
+
+		// Zotero populates preference-bound controls from a timer that runs after this, and an
+		// unset radiogroup reports its first radio in the meantime — which is why the JSON view
+		// was never restored. Re-read once the real value lands.
+		let view = document.getElementById('byok-voices-view');
+		if (view) view.addEventListener('syncfrompreference', () => this.updateVoicesView());
 	},
 
 	bindVoiceEditor() {
@@ -415,6 +517,11 @@ var Zotero_BYOK_TTS = {
 	 */
 	controlValue(id, fallbackPref) {
 		let elem = document.getElementById(id);
+		// A radiogroup that has not been populated yet reports its first radio rather than
+		// nothing, so only trust it once something is actually selected.
+		if (elem && elem.localName === 'radiogroup' && !elem.selectedItem) {
+			return this.getPref(fallbackPref);
+		}
 		let value = elem && elem.value;
 		return (value === undefined || value === null || value === '')
 			? this.getPref(fallbackPref)
@@ -523,31 +630,46 @@ var Zotero_BYOK_TTS = {
 		let pre = document.getElementById('byok-voices-highlight');
 		if (!area || !pre) return;
 
-		let escape = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		// The textarea can be value-less for a tick before the preference binding populates it
 		let source = area.value || '';
-		let html = '';
+		let pieces = [];
 		// key | string | number | literal | punctuation, in that order
 		let token = /("(?:[^"\\]|\\.)*"\s*:)|("(?:[^"\\]|\\.)*")|(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)|\b(true|false|null)\b|([{}\[\],:])/g;
 		let last = 0;
 		let match;
 		while ((match = token.exec(source)) !== null) {
-			html += escape(source.slice(last, match.index));
+			pieces.push([null, source.slice(last, match.index)]);
 			let cls = match[1] ? 'k' : match[2] ? 's' : match[3] ? 'n' : match[4] ? 'b' : 'p';
-			html += `<span class="byok-t-${cls}">${escape(match[0])}</span>`;
+			pieces.push([cls, match[0]]);
 			last = match.index + match[0].length;
 		}
-		html += escape(source.slice(last));
 		// A trailing newline keeps the last line visible when the textarea scrolls to the end
+		pieces.push([null, source.slice(last) + '\n']);
+
+		// Built as nodes rather than assigned as innerHTML: markup parsing is the sort of thing
+		// a chrome document can refuse, and a silent failure here shows as an empty editor.
+		let container = pre.closest ? pre.closest('.byok-code') : pre.parentNode;
 		try {
-			pre.innerHTML = html + '\n';
+			let fragment = document.createDocumentFragment();
+			for (let [cls, text] of pieces) {
+				if (!text) continue;
+				if (!cls) {
+					fragment.append(document.createTextNode(text));
+					continue;
+				}
+				let span = document.createElement('span');
+				span.className = 'byok-t-' + cls;
+				span.textContent = text;
+				fragment.append(span);
+			}
+			pre.replaceChildren(fragment);
 			// The textarea's own text is only hidden once something is definitely painted
 			// underneath it — otherwise a failed render leaves the editor looking empty.
-			pre.closest('.byok-code')?.classList.add('byok-highlighted');
+			container?.classList.add('byok-highlighted');
 		}
 		catch (e) {
 			Zotero.logError(e);
-			pre.closest('.byok-code')?.classList.remove('byok-highlighted');
+			container?.classList.remove('byok-highlighted');
 			return;
 		}
 		pre.scrollTop = area.scrollTop;

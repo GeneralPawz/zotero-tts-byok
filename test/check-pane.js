@@ -50,6 +50,11 @@ function loadPane({ prefs, controls }) {
 			focus() {}
 		};
 		if (id in controls) node.value = controls[id];
+		if (id === 'byok-voices-view') {
+			node.localName = 'radiogroup';
+			// XUL reports the first radio until something is genuinely selected
+			node.selectedItem = 'selected' in controls ? controls.selected : null;
+		}
 		return node;
 	};
 	const document = {
@@ -74,7 +79,19 @@ function loadPane({ prefs, controls }) {
 			version: '9.0.6',
 			logError() {},
 			Prefs: { get: k => prefs[k], set: (k, v) => (prefs[k] = v) },
-			BYOKTTS: { version: '1.6.0', Log: { path: 'x' } }
+			BYOKTTS: {
+				version: '1.9.0',
+				Log: { path: 'x' },
+				getVoices: () => [{ id: 'Kore', label: 'Kore', locales: ['en'] }],
+				EMOTIONS: [
+					['byok-emotion-group-amusement', ['laughing', 'silly', 'hysterical']],
+					['byok-emotion-group-joy', ['joyful', 'delighted', 'thrilled', 'ecstatic']],
+					['byok-emotion-group-yearning', ['longing', 'lust']],
+					['byok-emotion-group-surprise', ['surprised', 'startled', 'flabbergasted']],
+					['byok-emotion-group-displeasure', ['annoyed', 'bitter', 'angry', 'hostile', 'disgusted']],
+					['byok-emotion-group-delivery', ['whispering']]
+				]
+			}
 		}
 	};
 	vm.createContext(sandbox);
@@ -95,7 +112,7 @@ console.log('\nvoices view follows the control, not the stale preference');
 	// The user just clicked "json"; the preference still says "list"
 	let { pane, document } = loadPane({
 		prefs: { [P + 'voicesView']: 'list', [P + 'provider']: 'openai' },
-		controls: { 'byok-voices-view': 'json', 'byok-provider': 'openai' }
+		controls: { 'byok-voices-view': 'json', selected: { value: 'json' }, 'byok-provider': 'openai' }
 	});
 	pane.updateVoicesView();
 	check('json view shown', document.getElementById('byok-voices-json-view').hidden, false);
@@ -105,7 +122,7 @@ console.log('\nvoices view follows the control, not the stale preference');
 	// ...and the other way round
 	let { pane, document } = loadPane({
 		prefs: { [P + 'voicesView']: 'json', [P + 'provider']: 'openai' },
-		controls: { 'byok-voices-view': 'list', 'byok-provider': 'openai' }
+		controls: { 'byok-voices-view': 'list', selected: { value: 'list' }, 'byok-provider': 'openai' }
 	});
 	pane.updateVoicesView();
 	check('list view shown', document.getElementById('byok-voices-list-view').hidden, false);
@@ -119,6 +136,28 @@ console.log('\nvoices view follows the control, not the stale preference');
 	});
 	pane.updateVoicesView();
 	check('falls back to the preference', document.getElementById('byok-voices-json-view').hidden, false);
+}
+{
+	// The saved view was not restored on reopening: Zotero populates preference-bound controls
+	// from a later timer, and until then a radiogroup reports its FIRST radio rather than
+	// nothing — so "list" looked like a real choice and overrode the stored "json".
+	let { pane, document } = loadPane({
+		prefs: { [P + 'voicesView']: 'json', [P + 'provider']: 'openai' },
+		controls: { 'byok-voices-view': 'list', selected: null }
+	});
+	pane.updateVoicesView();
+	check('an unselected radiogroup does not override the stored view',
+		document.getElementById('byok-voices-json-view').hidden, false);
+}
+{
+	// Once the user really has clicked, the control wins over the stale preference
+	let { pane, document } = loadPane({
+		prefs: { [P + 'voicesView']: 'json', [P + 'provider']: 'openai' },
+		controls: { 'byok-voices-view': 'list', selected: { value: 'list' } }
+	});
+	pane.updateVoicesView();
+	check('a real selection still wins',
+		document.getElementById('byok-voices-list-view').hidden, false);
 }
 
 console.log('\nprovider rows follow the control too');

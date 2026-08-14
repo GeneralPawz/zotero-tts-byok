@@ -214,6 +214,14 @@ Zotero.BYOKTTS = new function () {
 			return { audio: null, error: 'unknown' };
 		}
 
+		// A leading [Name] hands the line to that character's voice
+		let speaker = this.matchSpeaker(text);
+		if (speaker) {
+			voice = speaker.voice;
+			locale = voice.locales[0];
+			text = speaker.text;
+		}
+
 		let started = Date.now();
 		try {
 			let blob = await this.synthesize(text, voice, locale);
@@ -278,6 +286,66 @@ Zotero.BYOKTTS = new function () {
 			throw new Error('Extra request JSON is not valid JSON: ' + e.message);
 		}
 		return Object.assign({}, body, extra);
+	};
+
+	/**
+	 * Inline performance tags that have been tried and behave, grouped by register. Defined here
+	 * rather than in the pane because the skip rules also need them: "Text in [ ]" would
+	 * otherwise strip every tag out before synthesis, which is exactly how a document's
+	 * [whispering] silently stops working.
+	 */
+	this.EMOTIONS = [
+		['byok-emotion-group-amusement', ['laughing', 'silly', 'hysterical']],
+		['byok-emotion-group-joy', ['joyful', 'delighted', 'thrilled', 'ecstatic']],
+		['byok-emotion-group-yearning', ['longing', 'lust']],
+		['byok-emotion-group-surprise', ['surprised', 'startled', 'flabbergasted']],
+		['byok-emotion-group-displeasure', ['annoyed', 'bitter', 'angry', 'hostile', 'disgusted']],
+		['byok-emotion-group-delivery', ['whispering']]
+	];
+
+	this.emotionTags = function () {
+		return this.EMOTIONS.flatMap(([, tags]) => tags);
+	};
+
+	/* --------------------------------------------------------------- speakers */
+
+	/** @return {Array<{tag: String, voice: String}>} */
+	this.getSpeakers = function () {
+		let raw = this.getPref('speakers');
+		if (!raw) return [];
+		try {
+			let parsed = JSON.parse(raw);
+			return Array.isArray(parsed)
+				? parsed.filter(s => s && s.tag && s.voice)
+				: [];
+		}
+		catch (e) {
+			Zotero.logError(new Error('BYOK TTS: speaker list is not valid JSON: ' + e.message));
+			return [];
+		}
+	};
+
+	this.speakerTags = function () {
+		return this.getSpeakers().map(s => String(s.tag).toLowerCase());
+	};
+
+	/**
+	 * Give each character its own voice. A leading [Name] naming a configured speaker switches
+	 * the voice for that segment and is removed before the text is sent.
+	 *
+	 * @return {{voice: Object, text: String}|null}
+	 */
+	this.matchSpeaker = function (text) {
+		let speakers = this.getSpeakers();
+		if (!speakers.length) return null;
+		let match = /^\s*\[([^\]]+)\]\s*/.exec(text);
+		if (!match) return null;
+		let name = match[1].trim().toLowerCase();
+		let speaker = speakers.find(s => String(s.tag).toLowerCase() === name);
+		if (!speaker) return null;
+		let voice = this.getVoices().find(v => v.id === speaker.voice);
+		if (!voice) return null;
+		return { voice, text: text.slice(match[0].length) };
 	};
 
 	/** OpenRouter is offered separately for convenience but speaks the OpenAI dialect. */

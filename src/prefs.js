@@ -47,3 +47,6 @@ pref("extensions.zotero.byokTTS.custom.pcmSampleRate", "0");
 pref("extensions.zotero.byokTTS.test.voice", "");
 pref("extensions.zotero.byokTTS.test.locale", "");
 pref("extensions.zotero.byokTTS.test.text", "");
+
+// Per-character voices: [{ "tag": "Mara", "voice": "Kore" }]
+pref("extensions.zotero.byokTTS.speakers", "[]");

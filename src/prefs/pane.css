@@ -217,3 +217,30 @@
 	.byok-t-b { color: #ffa657; }
 	.byok-error { color: #ff7b72; }
 }
+
+/* Speaker rows: tag, voice, remove */
+.byok-speaker-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr auto;
+	gap: 6px;
+	align-items: center;
+	padding: 2px 0;
+}
+
+.byok-speaker-row input,
+.byok-speaker-row menulist {
+	min-width: 0;
+	width: 100%;
+}
+
+#byok-speakers-rows {
+	max-height: calc(5 * 2.1em);
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+/* Group headings inside the emotion menu */
+.byok-menu-heading {
+	font-weight: 600;
+	opacity: .7;
+}

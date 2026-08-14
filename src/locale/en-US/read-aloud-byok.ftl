@@ -176,7 +176,7 @@ byok-emotion-group-displeasure = Displeasure
 byok-emotion-group-delivery = Delivery
 
 byok-provider-openrouter =
-    .label = OpenRouter (OpenAI-compatible)
+    .label = OpenRouter
 byok-models-load =
     .label = Load models…
 byok-test-menu-voice =
@@ -191,6 +191,14 @@ byok-msg-loading-models = Loading models…
 byok-msg-models-loaded = Loaded { $count } model(s).
 byok-msg-models-none = The provider listed no models — type the id instead.
 byok-msg-models-failed = Could not load models: { $detail }
+
+byok-speakers-heading = Speakers
+byok-speakers-hint = Give a character its own voice: a line beginning with the tag, e.g. [Mara], is spoken by that voice and the tag is not read out. Works alongside the emotion tags.
+byok-speakers-col-tag = Tag
+byok-speakers-col-voice = Voice
+byok-speakers-add =
+    .label = Add speaker
+byok-speakers-empty = No speakers configured.
 
 ## Status messages
 

@@ -176,7 +176,7 @@ byok-emotion-group-displeasure = Unmut
 byok-emotion-group-delivery = Vortrag
 
 byok-provider-openrouter =
-    .label = OpenRouter (OpenAI-kompatibel)
+    .label = OpenRouter
 byok-models-load =
     .label = Modelle laden …
 byok-test-menu-voice =
@@ -191,6 +191,14 @@ byok-msg-loading-models = Modelle werden geladen …
 byok-msg-models-loaded = { $count } Modell(e) geladen.
 byok-msg-models-none = Der Anbieter hat keine Modelle aufgelistet — ID bitte eintippen.
 byok-msg-models-failed = Modelle konnten nicht geladen werden: { $detail }
+
+byok-speakers-heading = Sprecher
+byok-speakers-hint = Einer Figur eine eigene Stimme geben: Eine Zeile, die mit dem Tag beginnt, z. B. [Mara], wird von dieser Stimme gesprochen; das Tag selbst wird nicht vorgelesen. Funktioniert zusammen mit den Emotions-Tags.
+byok-speakers-col-tag = Tag
+byok-speakers-col-voice = Stimme
+byok-speakers-add =
+    .label = Sprecher hinzufügen
+byok-speakers-empty = Keine Sprecher eingerichtet.
 
 ## Statusmeldungen
 

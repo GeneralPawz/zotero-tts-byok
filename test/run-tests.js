@@ -22,7 +22,14 @@ const sandbox = {
 		Prefs: { get: k => PREFS[k], set: (k, v) => (PREFS[k] = v) },
 		debug: () => {}, logError: () => {},
 		Reader: { _readers: [] },
-		BYOKTTS: {}
+		// skip.js asks the plugin which [tags] must survive the bracket rules
+		BYOKTTS: {
+			emotionTags: () => ['laughing', 'silly', 'hysterical', 'joyful', 'delighted',
+				'thrilled', 'ecstatic', 'longing', 'lust', 'surprised', 'startled',
+				'flabbergasted', 'annoyed', 'bitter', 'angry', 'hostile', 'disgusted',
+				'whispering'],
+			speakerTags: () => ['mara', 'theo']
+		}
 	}
 };
 vm.createContext(sandbox);
@@ -70,6 +77,22 @@ check('author-year removed', Skip.filterText('Earlier work (Doe & Roe 1999; Lee 
 rules(['urls']);
 check('url and doi removed', Skip.filterText('See https://example.org/x and doi:10.1234/abcd here.'),
 	'See and here.');
+
+/* --------------------------------------------------- performance tags survive */
+console.log('\nemotion and speaker tags survive the bracket rules');
+rules(['brackets', 'citations', 'parens']);
+check('emotion tag kept', Skip.filterText('[whispering] "I have a rolling pin."'),
+	'[whispering] "I have a rolling pin."');
+check('speaker tag kept', Skip.filterText('[Mara] [angry] "THEO?!"'), '[Mara] [angry] "THEO?!"');
+check('unknown bracket still dropped', Skip.filterText('[startled] "Oh." [aside] gone'),
+	'[startled] "Oh." gone');
+check('citations still dropped beside a tag',
+	Skip.filterText('[joyful] Prior work [12] and [3, 4] agree.'),
+	'[joyful] Prior work and agree.');
+check('tags survive with every text rule on',
+	(() => { rules(['brackets', 'citations', 'parens', 'urls', 'braces']);
+		return Skip.filterText('[thrilled] See https://x.org (Smith et al., 2020) now.'); })(),
+	'[thrilled] See now.');
 
 /* ------------------------------------------------------- formulas and tables */
 console.log('\nshape rules (must not eat prose)');
