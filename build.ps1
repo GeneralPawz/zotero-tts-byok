@@ -13,7 +13,17 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-$manifest = Get-Content (Join-Path $Source 'manifest.json') -Raw | ConvertFrom-Json
+$manifestPath = Join-Path $Source 'manifest.json'
+
+# PowerShell's utf8 encoding writes a byte order mark, and a BOM ahead of the opening brace
+# makes strict JSON parsers reject the manifest. ConvertFrom-Json tolerates it, so it would
+# otherwise only surface once Zotero refused the install.
+$bytes = [System.IO.File]::ReadAllBytes($manifestPath)
+if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+	throw 'manifest.json starts with a UTF-8 BOM; write it without one'
+}
+
+$manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
 $version = $manifest.version
 
 New-Item -ItemType Directory -Force $TargetDir | Out-Null

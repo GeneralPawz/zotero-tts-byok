@@ -65,6 +65,51 @@
 	width: 100%;
 }
 
+/*
+	Provider fields on one grid, so every control starts at the same x regardless of how wide
+	its label is. A hidden row leaves no gap because both of its cells carry the same class.
+*/
+.byok-fields {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 6px 10px;
+	align-items: center;
+	max-width: 52em;
+}
+
+.byok-fields > label {
+	justify-self: end;
+	text-align: end;
+}
+
+.byok-fields > input,
+.byok-fields > menulist,
+.byok-fields > .byok-combo {
+	min-width: 0;
+	width: 100%;
+}
+
+.byok-fields input[type="text"],
+.byok-fields input[type="password"] {
+	box-sizing: border-box;
+}
+
+/* Keep the reveal control clear of the last character of the key */
+.byok-secret {
+	padding-inline-end: 26px;
+}
+
+.byok-combo {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.byok-combo menulist {
+	flex: 1;
+	min-width: 0;
+}
+
 /* Rendered voice editor */
 .byok-voice-row {
 	display: grid;
@@ -83,6 +128,14 @@
 	font-size: .85em;
 	opacity: .7;
 	padding-bottom: 2px;
+	padding-inline-end: 12px;   /* leave room for the scrollbar below */
+}
+
+/* Five rows, then scroll — a full provider voice list runs to dozens */
+#byok-voices-rows {
+	max-height: calc(5 * 2.1em);
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .byok-voice-remove {
@@ -137,9 +190,13 @@
 	position: relative;
 	width: 100%;
 	background: transparent;
+	resize: vertical;
+}
+
+/* Only once the layer underneath is actually painted — see renderHighlight() */
+.byok-code.byok-highlighted > textarea {
 	color: transparent;
 	caret-color: var(--fill-primary, CanvasText);
-	resize: vertical;
 }
 
 .byok-code > textarea::selection {

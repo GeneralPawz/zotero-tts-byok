@@ -280,9 +280,15 @@ Zotero.BYOKTTS = new function () {
 		return Object.assign({}, body, extra);
 	};
 
+	/** OpenRouter is offered separately for convenience but speaks the OpenAI dialect. */
+	this.providerKind = function () {
+		let provider = this.getPref('provider');
+		return provider === 'openrouter' ? 'openai' : provider;
+	};
+
 	this.synthesize = async function (text, voice, locale) {
 		text = this._applyStyle(text);
-		switch (this.getPref('provider')) {
+		switch (this.providerKind()) {
 			case 'elevenlabs':
 				return this._elevenLabs(text, voice);
 			case 'speechify':
@@ -573,7 +579,7 @@ Zotero.BYOKTTS = new function () {
 	 * @return {Promise<Array>} voice entries ready to be written to the voices pref
 	 */
 	this.fetchRemoteVoices = async function () {
-		let provider = this.getPref('provider');
+		let provider = this.providerKind();
 		let key = this.getPref('apiKey');
 
 		if (provider === 'elevenlabs') {
@@ -684,6 +690,65 @@ Zotero.BYOKTTS = new function () {
 
 	// The reader matches a region-tagged voice only against documents in that exact region, but
 	// an untagged one against every region — so language codes are left bare on purpose.
+	/**
+	 * Ask the provider what models it has, so the Model field can be picked from rather than
+	 * typed. Providers that have no concept of a model, or no endpoint for it, simply return
+	 * an empty list and the field stays free text.
+	 *
+	 * @return {Promise<Array<{id: String, label: String}>>}
+	 */
+	this.fetchRemoteModels = async function () {
+		let provider = this.getPref('provider');
+		let key = this.getPref('apiKey');
+		let base = (this.getPref('baseUrl') || '').replace(/\/+$/, '');
+		let bearer = key ? { Authorization: 'Bearer ' + key } : {};
+
+		if (provider === 'openrouter' || /(^|\/\/|\.)openrouter\.ai/.test(base)) {
+			// Speech models are absent from OpenRouter's default listing
+			let xhr = await this._request(
+				'GET', base + '/models?output_modalities=speech', bearer, null, 'json');
+			return (xhr.response?.data || []).map(m => ({ id: m.id, label: m.name || m.id }));
+		}
+
+		if (provider === 'speechify') {
+			let xhr = await this._request('GET', base + '/audio/models', bearer, null, 'json');
+			let list = xhr.response?.models || [];
+			return list
+				.filter(m => !m.deprecated)
+				.map(m => ({ id: m.id, label: m.name ? `${m.id} — ${m.name}` : m.id }));
+		}
+
+		if (provider === 'elevenlabs') {
+			let xhr = await this._request(
+				'GET', base + '/models', { 'xi-api-key': key || '' }, null, 'json');
+			let list = Array.isArray(xhr.response) ? xhr.response : (xhr.response?.models || []);
+			return list
+				.filter(m => m.can_do_text_to_speech !== false)
+				.map(m => ({ id: m.model_id, label: m.name ? `${m.model_id} — ${m.name}` : m.model_id }))
+				.filter(m => m.id);
+		}
+
+		if (provider === 'google') {
+			let xhr = await this._request('GET', base + '/models', { 'x-goog-api-key': key || '' }, null, 'json');
+			return (xhr.response?.models || [])
+				.map(m => String(m.name || '').replace(/^models\//, ''))
+				.filter(id => /tts/i.test(id))
+				.map(id => ({ id, label: id }));
+		}
+
+		if (provider === 'openai') {
+			// api.openai.com lists everything, so narrow to the speech-capable ones; a local
+			// server usually lists only what it serves and the filter then matches nothing,
+			// in which case the unfiltered list is the better answer.
+			let xhr = await this._request('GET', base + '/models', bearer, null, 'json');
+			let ids = (xhr.response?.data || []).map(m => m.id).filter(Boolean);
+			let speech = ids.filter(id => /tts|speech|audio|voice/i.test(id));
+			return (speech.length ? speech : ids).map(id => ({ id, label: id }));
+		}
+
+		return [];
+	};
+
 	// A Speechify voice lists a locale per model it supports; collapse those to bare language
 	// codes so the reader offers the voice for every region of that language.
 	this._speechifyLocales = function (v) {

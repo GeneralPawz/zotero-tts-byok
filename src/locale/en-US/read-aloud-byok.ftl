@@ -175,6 +175,23 @@ byok-emotion-group-surprise = Surprise
 byok-emotion-group-displeasure = Displeasure
 byok-emotion-group-delivery = Delivery
 
+byok-provider-openrouter =
+    .label = OpenRouter (OpenAI-compatible)
+byok-models-load =
+    .label = Load models…
+byok-test-menu-voice =
+    .label = Voice
+byok-test-menu-first = First configured voice
+byok-test-menu-language =
+    .label = Language
+byok-test-menu-voice-default = Voice’s own language
+byok-test-menu-text =
+    .label = Test phrase…
+byok-msg-loading-models = Loading models…
+byok-msg-models-loaded = Loaded { $count } model(s).
+byok-msg-models-none = The provider listed no models — type the id instead.
+byok-msg-models-failed = Could not load models: { $detail }
+
 ## Status messages
 
 byok-msg-loading-voices = Loading voices…

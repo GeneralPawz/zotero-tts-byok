@@ -44,6 +44,7 @@ function loadPane({ prefs, controls }) {
 			replaceChildren() {},
 			removeAttribute() {},
 			querySelector() { return null; },
+			closest() { return null; },
 			setAttribute() {},
 			scrollIntoView() {},
 			focus() {}
@@ -57,7 +58,11 @@ function loadPane({ prefs, controls }) {
 			if (!elements.has(id)) elements.set(id, make(id));
 			return elements.get(id);
 		},
+		// Rows are now a label and a control sharing a class; one stand-in per selector is
+		// enough to observe which rows the code decides to hide.
+		querySelectorAll: (selector) => [document.getElementById('sel:' + selector)],
 		createElement: () => make('created'),
+		createXULElement: () => make('created'),
 		l10n: { setAttributes() {}, formatValue: async id => id, translateFragment: async () => {} }
 	};
 	const sandbox = {
@@ -125,8 +130,8 @@ console.log('\nprovider rows follow the control too');
 	});
 	pane.updateVisibility();
 	check('custom endpoint section shown', document.getElementById('byok-custom-group').hidden, false);
-	check('base URL row hidden', document.getElementById('byok-row-baseurl').hidden, true);
-	check('audio format row hidden', document.getElementById('byok-row-format').hidden, true);
+	check('base URL row hidden', document.getElementById('sel:.byok-row-baseurl').hidden, true);
+	check('audio format row hidden', document.getElementById('sel:.byok-row-format').hidden, true);
 }
 {
 	// PCM rows appear from the format control, again ahead of the preference
@@ -135,8 +140,29 @@ console.log('\nprovider rows follow the control too');
 		controls: { 'byok-provider': 'openai', 'byok-format': 'pcm', 'byok-voices-view': 'list' }
 	});
 	pane.updateVisibility();
-	check('PCM sample rate row shown', document.getElementById('byok-row-pcm').hidden, false);
+	check('PCM sample rate row shown', document.getElementById('sel:.byok-row-pcm').hidden, false);
 	check('PCM hint shown', document.getElementById('byok-pcm-hint').hidden, false);
+}
+{
+	// OpenRouter is its own menu entry but must be given the OpenAI-shaped fields
+	let { pane, document } = loadPane({
+		prefs: { [P + 'provider']: 'openai', [P + 'format']: 'pcm' },
+		controls: { 'byok-provider': 'openrouter', 'byok-format': 'pcm', 'byok-voices-view': 'list' }
+	});
+	pane.updateVisibility();
+	check('openrouter keeps the audio format row', document.getElementById('sel:.byok-row-format').hidden, false);
+	check('openrouter keeps the PCM row', document.getElementById('sel:.byok-row-pcm').hidden, false);
+	check('openrouter keeps the base URL row', document.getElementById('sel:.byok-row-baseurl').hidden, false);
+	check('openrouter can load voices', document.getElementById('byok-load-voices').disabled, false);
+	check('openrouter can load models', document.getElementById('byok-load-models').disabled, false);
+}
+{
+	let { pane, document } = loadPane({
+		prefs: {}, controls: { 'byok-provider': 'azure', 'byok-voices-view': 'list' }
+	});
+	pane.updateVisibility();
+	check('azure hides the model row', document.getElementById('sel:.byok-row-model').hidden, true);
+	check('azure cannot load models', document.getElementById('byok-load-models').disabled, true);
 }
 
 console.log('\nsticky button reflects the last outcome');

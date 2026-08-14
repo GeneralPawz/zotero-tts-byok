@@ -19,6 +19,11 @@ var Zotero_BYOK_TTS = {
 				{ id: 'onyx', label: 'Onyx', locales: ['en', 'de'] }
 			]
 		},
+		openrouter: {
+			baseUrl: 'https://openrouter.ai/api/v1',
+			model: 'google/gemini-3.1-flash-tts-preview',
+			voices: []
+		},
 		elevenlabs: {
 			baseUrl: 'https://api.elevenlabs.io/v1',
 			model: 'eleven_turbo_v2_5',
@@ -69,6 +74,7 @@ var Zotero_BYOK_TTS = {
 		}
 
 		this.bindVoiceEditor();
+		this.bindControls();
 		await this.buildEmotionPicker();
 		this.onProviderChange(true);
 		this.refreshLogPath();
@@ -155,6 +161,132 @@ var Zotero_BYOK_TTS = {
 		}
 	},
 
+	/* -------------------------------------------------------------- models */
+
+	// Offered before anything has been fetched, so the dropdown is useful without a key
+	KNOWN_MODELS: {
+		openai: ['gpt-4o-mini-tts', 'tts-1', 'tts-1-hd'],
+		openrouter: [
+			'google/gemini-3.1-flash-tts-preview',
+			'deepgram/aura-2',
+			'microsoft/mai-voice-2-flash',
+			'mistralai/voxtral-mini-tts-2603',
+			'x-ai/grok-voice-tts-1.0',
+			'hexgrad/kokoro-82m'
+		],
+		elevenlabs: ['eleven_turbo_v2_5', 'eleven_multilingual_v2', 'eleven_flash_v2_5'],
+		speechify: ['simba-3.0', 'simba-3.2', 'simba-english', 'simba-multilingual'],
+		google: ['gemini-2.5-flash-preview-tts', 'gemini-2.5-pro-preview-tts'],
+		azure: [],
+		custom: []
+	},
+
+	/** Fill the Model combobox, keeping whatever is typed as the current value. */
+	fillModelList(models) {
+		let popup = document.getElementById('byok-model-popup');
+		let list = document.getElementById('byok-model');
+		if (!popup || !list) return;
+		let current = list.value;
+		popup.replaceChildren();
+		for (let model of models) {
+			let item = document.createXULElement('menuitem');
+			item.setAttribute('value', model.id);
+			item.setAttribute('label', model.label || model.id);
+			popup.append(item);
+		}
+		// An editable menulist clears itself when its items change
+		list.value = current;
+	},
+
+	resetModelList() {
+		let provider = this.controlValue('byok-provider', 'provider') || 'openai';
+		let known = this.KNOWN_MODELS[provider] || [];
+		this.fillModelList(known.map(id => ({ id, label: id })));
+	},
+
+	async loadModels() {
+		this.statusL10n('byok-msg-loading-models');
+		try {
+			let models = await Zotero.BYOKTTS.fetchRemoteModels();
+			if (!models.length) {
+				this.resetModelList();
+				this.statusL10n('byok-msg-models-none', null, true);
+				return;
+			}
+			this.fillModelList(models);
+			this.statusL10n('byok-msg-models-loaded', { count: models.length });
+		}
+		catch (e) {
+			Zotero.logError(e);
+			this.resetModelList();
+			this.statusL10n('byok-msg-models-failed', { detail: await this._describe(e) }, true);
+		}
+	},
+
+	/* ---------------------------------------------------------- test menu */
+
+	/**
+	 * Right-click menu on the test buttons: which voice, which language, and optionally a
+	 * phrase of your own instead of the built-in sample.
+	 */
+	async buildTestMenu(popup) {
+		popup.replaceChildren();
+		let voices = Zotero.BYOKTTS.getVoices();
+		let chosenVoice = this.getPref('test.voice') || '';
+		let chosenLocale = this.getPref('test.locale') || '';
+
+		let header = (id) => {
+			let item = document.createXULElement('menuitem');
+			document.l10n.setAttributes(item, id);
+			item.setAttribute('disabled', 'true');
+			popup.append(item);
+		};
+		let option = (label, checked, onCommand) => {
+			let item = document.createXULElement('menuitem');
+			item.setAttribute('type', 'radio');
+			item.setAttribute('label', label);
+			if (checked) item.setAttribute('checked', 'true');
+			item.addEventListener('command', onCommand);
+			popup.append(item);
+			return item;
+		};
+
+		header('byok-test-menu-voice');
+		option(await this.msg('byok-test-menu-first'), !chosenVoice,
+			() => this.setPref('test.voice', ''));
+		for (let voice of voices) {
+			option(voice.label || voice.id, chosenVoice === voice.id,
+				() => this.setPref('test.voice', voice.id));
+		}
+
+		popup.append(document.createXULElement('menuseparator'));
+		header('byok-test-menu-language');
+		let locales = [...new Set(voices.flatMap(v => v.locales || []))];
+		option(await this.msg('byok-test-menu-voice-default'), !chosenLocale,
+			() => this.setPref('test.locale', ''));
+		for (let locale of locales) {
+			option(locale, chosenLocale === locale, () => this.setPref('test.locale', locale));
+		}
+
+		popup.append(document.createXULElement('menuseparator'));
+		let custom = document.createXULElement('menuitem');
+		document.l10n.setAttributes(custom, 'byok-test-menu-text');
+		custom.addEventListener('command', () => this.promptTestText());
+		popup.append(custom);
+	},
+
+	promptTestText() {
+		let current = this.getPref('test.text') || '';
+		let result = { value: current };
+		let title = 'Read Aloud BYOK';
+		let prompts = typeof Services !== "undefined" && Services.prompt;
+		if (!prompts) return;
+		let ok = prompts.prompt(window, title,
+			// Fluent cannot be awaited from a prompt callback, so this one string is inline
+			'Text to speak when testing (leave empty for the built-in sample):', result, null, {});
+		if (ok) this.setPref('test.text', result.value.trim());
+	},
+
 	/* ------------------------------------------------------- speaking style */
 
 	/**
@@ -234,6 +366,24 @@ var Zotero_BYOK_TTS = {
 		this.setPref('voices', JSON.stringify(voices, null, 2));
 		this.renderVoiceRows();
 		this.renderHighlight();
+	},
+
+	/**
+	 * Listen for the controls that change what is shown.
+	 *
+	 * These were inline oncommand attributes, which XUL compiles when the element is parsed —
+	 * before Zotero attaches the listener that writes the preference. Registering here, during
+	 * load, puts us behind Zotero's listener, so the preference is already written by the time
+	 * we look. controlValue() still reads the element as a belt to this braces.
+	 */
+	bindControls() {
+		let on = (id, handler) => {
+			let elem = document.getElementById(id);
+			if (elem) elem.addEventListener('command', handler);
+		};
+		on('byok-provider', () => this.onProviderChange());
+		on('byok-format', () => this.updateVisibility());
+		on('byok-voices-view', () => this.updateVoicesView());
 	},
 
 	bindVoiceEditor() {
@@ -389,7 +539,17 @@ var Zotero_BYOK_TTS = {
 		}
 		html += escape(source.slice(last));
 		// A trailing newline keeps the last line visible when the textarea scrolls to the end
-		pre.innerHTML = html + '\n';
+		try {
+			pre.innerHTML = html + '\n';
+			// The textarea's own text is only hidden once something is definitely painted
+			// underneath it — otherwise a failed render leaves the editor looking empty.
+			pre.closest('.byok-code')?.classList.add('byok-highlighted');
+		}
+		catch (e) {
+			Zotero.logError(e);
+			pre.closest('.byok-code')?.classList.remove('byok-highlighted');
+			return;
+		}
 		pre.scrollTop = area.scrollTop;
 		pre.scrollLeft = area.scrollLeft;
 	},
@@ -430,15 +590,22 @@ var Zotero_BYOK_TTS = {
 		let provider = this.controlValue('byok-provider', 'provider') || 'openai';
 		let isPCM = this.controlValue('byok-format', 'format') === 'pcm';
 
+		// OpenRouter is a separate entry in the menu but takes the OpenAI-shaped fields
+		let openaiLike = provider === 'openai' || provider === 'openrouter';
+
 		let show = (id, visible) => {
 			let elem = document.getElementById(id);
 			if (elem) elem.hidden = !visible;
 		};
-		show('byok-row-baseurl', provider !== 'custom');
-		show('byok-row-model', provider !== 'azure');
-		show('byok-row-format', provider === 'openai');
-		show('byok-row-pcm', provider === 'openai' && isPCM);
-		show('byok-pcm-hint', provider === 'openai' && isPCM);
+		// A grid row is a label and a control side by side, so both cells move together
+		let showRow = (name, visible) => {
+			for (let elem of document.querySelectorAll('.' + name)) elem.hidden = !visible;
+		};
+		showRow('byok-row-baseurl', provider !== 'custom');
+		showRow('byok-row-model', provider !== 'azure');
+		showRow('byok-row-format', openaiLike);
+		showRow('byok-row-pcm', openaiLike && isPCM);
+		show('byok-pcm-hint', openaiLike && isPCM);
 		show('byok-custom-group', provider === 'custom');
 
 		let baseLabel = document.getElementById('byok-baseurl-label');
@@ -448,8 +615,13 @@ var Zotero_BYOK_TTS = {
 		}
 		let loadButton = document.getElementById('byok-load-voices');
 		if (loadButton) {
-			loadButton.disabled = !['openai', 'elevenlabs', 'speechify'].includes(provider);
+			loadButton.disabled = !['openai', 'openrouter', 'elevenlabs', 'speechify'].includes(provider);
 		}
+		let modelsButton = document.getElementById('byok-load-models');
+		if (modelsButton) {
+			modelsButton.disabled = ['azure', 'custom'].includes(provider);
+		}
+		this.resetModelList();
 		this.updateVoicesView();
 	},
 
@@ -488,11 +660,15 @@ var Zotero_BYOK_TTS = {
 			this.statusL10n('byok-msg-need-voice', null, true);
 			return;
 		}
-		let voice = voices[0];
+		// Right-click on the button overrides any of these
+		let wantedVoice = this.getPref('test.voice');
+		let voice = voices.find(v => v.id === wantedVoice) || voices[0];
+		let locale = this.getPref('test.locale') || voice.locales[0];
+		let text = this.getPref('test.text') || Zotero.BYOKTTS.sampleTextFor(locale);
+
 		this.statusL10n('byok-msg-requesting', { voice: voice.label });
 		try {
-			let blob = await Zotero.BYOKTTS.synthesize(
-				Zotero.BYOKTTS.sampleTextFor(voice.locales[0]), voice, voice.locales[0]);
+			let blob = await Zotero.BYOKTTS.synthesize(text, voice, locale);
 			if (!blob || !blob.size) {
 				this.statusL10n('byok-msg-no-audio', null, true);
 				return;

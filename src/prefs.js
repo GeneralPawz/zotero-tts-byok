@@ -42,3 +42,8 @@ pref("extensions.zotero.byokTTS.custom.body", "{\"text\":\"{{text}}\",\"voice\":
 pref("extensions.zotero.byokTTS.custom.audioPath", "");
 pref("extensions.zotero.byokTTS.custom.mimeType", "audio/mpeg");
 pref("extensions.zotero.byokTTS.custom.pcmSampleRate", "0");
+
+// Test-phrase overrides, set from the right-click menu on the test buttons
+pref("extensions.zotero.byokTTS.test.voice", "");
+pref("extensions.zotero.byokTTS.test.locale", "");
+pref("extensions.zotero.byokTTS.test.text", "");

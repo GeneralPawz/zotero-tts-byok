@@ -101,11 +101,12 @@ endpoint, so its voices are pre-filled instead.
 
 ### OpenRouter
 
-Also OpenAI-compatible — one key across every TTS provider it routes to.
+Its own entry in the provider list, though it speaks the OpenAI dialect — one key across every
+TTS provider it routes to.
 
 | Field | Value |
 | --- | --- |
-| Provider | OpenAI-compatible |
+| Provider | OpenRouter |
 | Base URL | `https://openrouter.ai/api/v1` |
 | Model | a speech slug, e.g. `google/gemini-3.1-flash-tts-preview` |
 | Audio format | `mp3`, or `pcm` for models that refuse everything else |
@@ -405,6 +406,23 @@ The skip fixtures are an academic paper and a furniture-heavy standards page wit
 watermark whose text extraction mangles differently on every page. Every case came from a bug;
 they should stay passing.
 
+## Choosing a model
+
+The Model field is a combobox: type an id, or pick one from the list. It starts with the models
+known to work for the selected provider, and **Load models…** replaces that with whatever the
+provider actually offers:
+
+| Provider | Endpoint |
+| --- | --- |
+| OpenRouter | `GET /models?output_modalities=speech` — speech models only, since they are absent from the default listing |
+| OpenAI-compatible | `GET /models`, narrowed to speech-capable ids; a local server usually lists only what it serves, so an empty filter falls back to everything |
+| Speechify | `GET /audio/models`, deprecated ones dropped |
+| ElevenLabs | `GET /models` |
+| Gemini | `GET /models`, narrowed to TTS |
+
+Azure has no model concept — its voice id carries everything — so the field and the button are
+hidden there.
+
 ## The test bar
 
 A bar pinned to the top of the settings pane carries **Speak a test phrase**, which plays the
@@ -412,6 +430,9 @@ first configured voice with whatever is currently set — so a style prompt or a
 tried repeatedly without leaving the section being edited. It turns green after a success and red
 after a failure, with the gist of the result beside it. **Output ⤓** jumps to Maintenance, where
 the full message and the copy button live; nothing drags you there on its own.
+
+Right-click either test button to choose which voice and language to test with, or to set a phrase
+of your own in place of the built-in sample — useful for hearing one emotion tag in isolation.
 
 ## Settings
 

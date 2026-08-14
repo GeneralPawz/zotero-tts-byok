@@ -7,7 +7,10 @@
 	<hbox id="byok-sticky" align="center">
 		<button id="byok-test-sticky" class="byok-state-idle"
 			data-l10n-id="byok-test-now"
+			context="byok-test-menu"
 			oncommand="Zotero.BYOKTTS.pane.test()"/>
+		<menupopup id="byok-test-menu"
+			onpopupshowing="Zotero.BYOKTTS.pane.buildTestMenu(this)"/>
 		<button id="byok-jump-output" data-l10n-id="byok-jump-output"
 			oncommand="Zotero.BYOKTTS.pane.jumpToTest()"/>
 		<description id="byok-sticky-summary" class="byok-hint"/>
@@ -22,13 +25,14 @@
 
 		<separator class="thin"/>
 
-		<hbox align="center">
+		<!-- One grid so every control starts on the same line, whatever its label's width -->
+		<html:div class="byok-fields">
 			<label data-l10n-id="byok-provider" control="byok-provider"/>
 			<menulist id="byok-provider" native="true"
-				preference="extensions.zotero.byokTTS.provider"
-				oncommand="Zotero.BYOKTTS.pane.onProviderChange()">
+				preference="extensions.zotero.byokTTS.provider">
 				<menupopup>
 					<menuitem value="openai" data-l10n-id="byok-provider-openai"/>
+					<menuitem value="openrouter" data-l10n-id="byok-provider-openrouter"/>
 					<menuitem value="elevenlabs" data-l10n-id="byok-provider-elevenlabs"/>
 					<menuitem value="speechify" data-l10n-id="byok-provider-speechify"/>
 					<menuitem value="azure" data-l10n-id="byok-provider-azure"/>
@@ -36,32 +40,32 @@
 					<menuitem value="custom" data-l10n-id="byok-provider-custom"/>
 				</menupopup>
 			</menulist>
-		</hbox>
 
-		<hbox align="center" id="byok-row-baseurl">
-			<label id="byok-baseurl-label" data-l10n-id="byok-base-url" control="byok-baseurl"/>
-			<html:input id="byok-baseurl" type="text" class="byok-wide"
+			<label id="byok-baseurl-label" class="byok-row-baseurl"
+				data-l10n-id="byok-base-url" control="byok-baseurl"/>
+			<html:input id="byok-baseurl" type="text" class="byok-row-baseurl"
 				preference="extensions.zotero.byokTTS.baseUrl"/>
-		</hbox>
 
-		<hbox align="center">
 			<label data-l10n-id="byok-api-key" control="byok-apikey"/>
-			<html:input id="byok-apikey" type="password" class="byok-wide"
+			<html:input id="byok-apikey" type="password" class="byok-secret"
 				preference="extensions.zotero.byokTTS.apiKey"/>
-		</hbox>
-		<description class="byok-hint" data-l10n-id="byok-api-key-hint"/>
 
-		<hbox align="center" id="byok-row-model">
-			<label data-l10n-id="byok-model" control="byok-model"/>
-			<html:input id="byok-model" type="text" class="byok-wide"
-				preference="extensions.zotero.byokTTS.model"/>
-		</hbox>
+			<html:span/>
+			<description class="byok-hint" data-l10n-id="byok-api-key-hint"/>
 
-		<hbox align="center" id="byok-row-format">
-			<label data-l10n-id="byok-audio-format" control="byok-format"/>
-			<menulist id="byok-format" native="true"
-				preference="extensions.zotero.byokTTS.format"
-				oncommand="Zotero.BYOKTTS.pane.updateVisibility()">
+			<label class="byok-row-model" data-l10n-id="byok-model" control="byok-model"/>
+			<html:div class="byok-row-model byok-combo">
+				<menulist id="byok-model" editable="true" native="true"
+					preference="extensions.zotero.byokTTS.model">
+					<menupopup id="byok-model-popup"/>
+				</menulist>
+				<button id="byok-load-models" data-l10n-id="byok-models-load"
+					oncommand="Zotero.BYOKTTS.pane.loadModels()"/>
+			</html:div>
+
+			<label class="byok-row-format" data-l10n-id="byok-audio-format" control="byok-format"/>
+			<menulist id="byok-format" native="true" class="byok-row-format"
+				preference="extensions.zotero.byokTTS.format">
 				<menupopup>
 					<menuitem value="mp3" label="mp3"/>
 					<menuitem value="opus" label="opus"/>
@@ -71,13 +75,11 @@
 					<menuitem value="pcm" data-l10n-id="byok-audio-format-pcm"/>
 				</menupopup>
 			</menulist>
-		</hbox>
 
-		<hbox align="center" id="byok-row-pcm">
-			<label data-l10n-id="byok-pcm-rate" control="byok-pcm-rate"/>
-			<html:input id="byok-pcm-rate" type="text" size="8"
+			<label class="byok-row-pcm" data-l10n-id="byok-pcm-rate" control="byok-pcm-rate"/>
+			<html:input id="byok-pcm-rate" type="text" size="8" class="byok-row-pcm"
 				preference="extensions.zotero.byokTTS.pcmSampleRate"/>
-		</hbox>
+		</html:div>
 		<description id="byok-pcm-hint" class="byok-hint" data-l10n-id="byok-pcm-hint"/>
 	</groupbox>
 
@@ -141,7 +143,7 @@
 
 		<radiogroup id="byok-voices-view" orient="horizontal"
 			preference="extensions.zotero.byokTTS.voicesView"
-			oncommand="Zotero.BYOKTTS.pane.updateVoicesView()">
+			>
 			<radio value="list" data-l10n-id="byok-voices-view-list"/>
 			<radio value="json" data-l10n-id="byok-voices-view-json"/>
 		</radiogroup>
@@ -312,6 +314,7 @@
 		<label><html:h2 data-l10n-id="byok-maintenance-heading"/></label>
 		<hbox align="center">
 			<button id="byok-test" data-l10n-id="byok-test-now"
+				context="byok-test-menu"
 				oncommand="Zotero.BYOKTTS.pane.test()"/>
 			<button id="byok-clear-cache" data-l10n-id="byok-clear-cache"
 				oncommand="Zotero.BYOKTTS.pane.clearCache()"/>
