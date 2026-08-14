@@ -49,6 +49,20 @@ for (const asset of assets) {
 	if (!referenced.has(asset)) console.log(`  note: ${asset} is not referenced anywhere`);
 }
 
+/*
+	GitHub turns a bare user-attachments URL into a video player, but only when the URL is alone
+	on its own line. Wrapped in a link, in angle brackets, or reflowed onto a line with prose, it
+	silently degrades to an ordinary link — the player just quietly stops being a player.
+*/
+const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+const attachments = readme.match(/https:\/\/github\.com\/user-attachments\/assets\/[\w-]+/g) || [];
+if (!attachments.length) fail('README.md: the embedded video URL is gone');
+for (const url of attachments) {
+	const bare = readme.split(/\r?\n/).some(line => line.trim() === url);
+	if (bare) console.log(`  video embed             ${url.split('/').pop()} renders as a player`);
+	else fail(`README.md: ${url} is not alone on its line, so it renders as a link, not a player`);
+}
+
 /* Every docs page should lead back, or the split leaves dead ends */
 for (const page of pages.filter(p => p.startsWith('docs'))) {
 	const text = fs.readFileSync(path.join(ROOT, page), 'utf8');

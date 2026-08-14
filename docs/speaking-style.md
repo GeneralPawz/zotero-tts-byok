@@ -60,10 +60,11 @@ itself is not read out:
 
 ![Speakers](../media/settings-speakers.png)
 
-> [!NOTE]
-> **[Watch it working](../media/multi-speaker.mp4)** — half a minute of the speaking test being
-> read by a narrator and two characters. The recording has sound, which is rather the point.
-> GitHub opens `.mp4` files in a player; the file is also in the repository under `media/`.
+![The reader following the narration, a voice per character](../media/multi-speaker.gif)
+
+This clip is silent. The [README](../README.md) plays the same half minute with sound, which is
+rather the point; the recording is also in the repository as
+[`media/multi-speaker.mp4`](../media/multi-speaker.mp4) if you would rather have the file.
 
 #### Setting it up
 

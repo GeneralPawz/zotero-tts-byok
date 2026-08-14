@@ -73,11 +73,11 @@ It uses every one of the eighteen tested emotion tags at least once, and its dia
 for two characters, so configuring speakers named `Mara` and `Theo` plus a voice for untagged text
 gives you a narrator and a cast rather than one voice reading everything.
 
-![The speaking test being read, highlighting following the narration](media/multi-speaker.gif)
+https://github.com/user-attachments/assets/c781db31-a620-4a84-a32e-65f8b543f171
 
-The clip above is silent, and the voices are the point — **[watch it with
-sound](media/multi-speaker.mp4)** (30 seconds). [Speaking style](docs/speaking-style.md) explains
-how to set it up.
+Half a minute of it being read by a narrator and two characters. **Unmute the player** — GitHub
+starts videos muted and the voices are rather the point. [Speaking style](docs/speaking-style.md)
+explains how to set it up.
 
 ## How it works, briefly 🔍
 
