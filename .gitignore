@@ -1,7 +1,8 @@
 # Build output
+target/
 *.xpi
 
-# Diagnostic log, if anyone runs the plugin from a checkout
+# Diagnostic log, if the plugin is ever run from a checkout
 *.jsonl
 
 node_modules/

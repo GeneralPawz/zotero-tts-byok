@@ -1,0 +1,320 @@
+<vbox onload="event.waitUntil(Zotero.BYOKTTS.pane.init())">
+	<!-- Sticky, so settings can be changed anywhere on the page and heard without scrolling -->
+	<vbox id="byok-sticky">
+		<hbox align="center">
+			<button id="byok-test" data-l10n-id="byok-test-now"
+				oncommand="Zotero.BYOKTTS.pane.test()"/>
+			<description class="byok-hint" data-l10n-id="byok-test-hint"/>
+			<spacer flex="1"/>
+			<description id="byok-version" class="byok-hint"/>
+		</hbox>
+
+		<vbox id="byok-status-box" hidden="true">
+			<html:textarea id="byok-status" class="byok-wide byok-mono" rows="4"
+				readonly="readonly"/>
+			<hbox>
+				<button id="byok-copy-status" data-l10n-id="byok-copy-message"
+					oncommand="Zotero.BYOKTTS.pane.copyStatus()"/>
+			</hbox>
+		</vbox>
+	</vbox>
+
+	<groupbox class="main-section">
+		<label><html:h2 data-l10n-id="byok-provider-heading"/></label>
+
+		<checkbox id="byok-enabled" data-l10n-id="byok-enabled"
+			preference="extensions.zotero.byokTTS.enabled"/>
+		<description class="byok-hint" data-l10n-id="byok-enabled-hint"/>
+
+		<separator class="thin"/>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-provider" control="byok-provider"/>
+			<menulist id="byok-provider" native="true"
+				preference="extensions.zotero.byokTTS.provider"
+				oncommand="Zotero.BYOKTTS.pane.onProviderChange()">
+				<menupopup>
+					<menuitem value="openai" data-l10n-id="byok-provider-openai"/>
+					<menuitem value="elevenlabs" data-l10n-id="byok-provider-elevenlabs"/>
+					<menuitem value="speechify" data-l10n-id="byok-provider-speechify"/>
+					<menuitem value="azure" data-l10n-id="byok-provider-azure"/>
+					<menuitem value="google" data-l10n-id="byok-provider-google"/>
+					<menuitem value="custom" data-l10n-id="byok-provider-custom"/>
+				</menupopup>
+			</menulist>
+		</hbox>
+
+		<hbox align="center" id="byok-row-baseurl">
+			<label id="byok-baseurl-label" data-l10n-id="byok-base-url" control="byok-baseurl"/>
+			<html:input id="byok-baseurl" type="text" class="byok-wide"
+				preference="extensions.zotero.byokTTS.baseUrl"/>
+		</hbox>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-api-key" control="byok-apikey"/>
+			<html:input id="byok-apikey" type="password" class="byok-wide"
+				preference="extensions.zotero.byokTTS.apiKey"/>
+		</hbox>
+		<description class="byok-hint" data-l10n-id="byok-api-key-hint"/>
+
+		<hbox align="center" id="byok-row-model">
+			<label data-l10n-id="byok-model" control="byok-model"/>
+			<html:input id="byok-model" type="text" class="byok-wide"
+				preference="extensions.zotero.byokTTS.model"/>
+		</hbox>
+
+		<hbox align="center" id="byok-row-format">
+			<label data-l10n-id="byok-audio-format" control="byok-format"/>
+			<menulist id="byok-format" native="true"
+				preference="extensions.zotero.byokTTS.format"
+				oncommand="Zotero.BYOKTTS.pane.updateVisibility()">
+				<menupopup>
+					<menuitem value="mp3" label="mp3"/>
+					<menuitem value="opus" label="opus"/>
+					<menuitem value="aac" label="aac"/>
+					<menuitem value="flac" label="flac"/>
+					<menuitem value="wav" label="wav"/>
+					<menuitem value="pcm" data-l10n-id="byok-audio-format-pcm"/>
+				</menupopup>
+			</menulist>
+		</hbox>
+
+		<hbox align="center" id="byok-row-pcm">
+			<label data-l10n-id="byok-pcm-rate" control="byok-pcm-rate"/>
+			<html:input id="byok-pcm-rate" type="text" size="8"
+				preference="extensions.zotero.byokTTS.pcmSampleRate"/>
+		</hbox>
+		<description id="byok-pcm-hint" class="byok-hint" data-l10n-id="byok-pcm-hint"/>
+	</groupbox>
+
+	<groupbox id="byok-custom-group">
+		<label><html:h2 data-l10n-id="byok-custom-heading"/></label>
+		<description class="byok-hint" data-l10n-id="byok-custom-hint"/>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-custom-method" control="byok-custom-method"/>
+			<menulist id="byok-custom-method" native="true"
+				preference="extensions.zotero.byokTTS.custom.method">
+				<menupopup>
+					<menuitem value="POST" label="POST"/>
+					<menuitem value="GET" label="GET"/>
+				</menupopup>
+			</menulist>
+		</hbox>
+
+		<vbox>
+			<label data-l10n-id="byok-custom-url" control="byok-custom-url"/>
+			<html:input id="byok-custom-url" type="text" class="byok-wide"
+				preference="extensions.zotero.byokTTS.custom.url"/>
+		</vbox>
+
+		<vbox>
+			<label data-l10n-id="byok-custom-headers" control="byok-custom-headers"/>
+			<html:textarea id="byok-custom-headers" rows="3" class="byok-wide byok-mono"
+				preference="extensions.zotero.byokTTS.custom.headers"/>
+		</vbox>
+
+		<vbox>
+			<label data-l10n-id="byok-custom-body" control="byok-custom-body"/>
+			<html:textarea id="byok-custom-body" rows="4" class="byok-wide byok-mono"
+				preference="extensions.zotero.byokTTS.custom.body"/>
+		</vbox>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-custom-audio-path" control="byok-custom-audiopath"/>
+			<html:input id="byok-custom-audiopath" type="text" class="byok-wide"
+				preference="extensions.zotero.byokTTS.custom.audioPath"/>
+		</hbox>
+		<description class="byok-hint" data-l10n-id="byok-custom-audio-path-hint"/>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-custom-mime" control="byok-custom-mime"/>
+			<html:input id="byok-custom-mime" type="text"
+				preference="extensions.zotero.byokTTS.custom.mimeType"/>
+		</hbox>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-custom-pcm" control="byok-custom-pcm"/>
+			<html:input id="byok-custom-pcm" type="text" size="8"
+				preference="extensions.zotero.byokTTS.custom.pcmSampleRate"/>
+		</hbox>
+		<description class="byok-hint" data-l10n-id="byok-custom-pcm-hint"/>
+	</groupbox>
+
+	<groupbox>
+		<label><html:h2 data-l10n-id="byok-voices-heading"/></label>
+		<description class="byok-hint" data-l10n-id="byok-voices-hint"/>
+
+		<radiogroup id="byok-voices-view" orient="horizontal"
+			preference="extensions.zotero.byokTTS.voicesView"
+			oncommand="Zotero.BYOKTTS.pane.updateVoicesView()">
+			<radio value="list" data-l10n-id="byok-voices-view-list"/>
+			<radio value="json" data-l10n-id="byok-voices-view-json"/>
+		</radiogroup>
+
+		<!-- Rendered editor -->
+		<vbox id="byok-voices-list-view">
+			<html:div id="byok-voices-head" class="byok-voice-row byok-voice-head">
+				<html:span data-l10n-id="byok-voices-col-id"/>
+				<html:span data-l10n-id="byok-voices-col-label"/>
+				<html:span data-l10n-id="byok-voices-col-locales"/>
+				<html:span/>
+			</html:div>
+			<vbox id="byok-voices-rows"/>
+			<description id="byok-voices-empty" class="byok-hint"
+				data-l10n-id="byok-voices-empty"/>
+			<hbox>
+				<button id="byok-voices-add" data-l10n-id="byok-voices-add"
+					oncommand="Zotero.BYOKTTS.pane.addVoice()"/>
+			</hbox>
+		</vbox>
+
+		<!-- Raw JSON, with the highlight layer sitting behind a transparent textarea -->
+		<vbox id="byok-voices-json-view">
+			<html:div class="byok-code">
+				<html:pre id="byok-voices-highlight" aria-hidden="true"/>
+				<html:textarea id="byok-voices" rows="10" spellcheck="false"
+					class="byok-mono"
+					preference="extensions.zotero.byokTTS.voices"/>
+			</html:div>
+		</vbox>
+
+		<hbox align="center">
+			<button id="byok-load-voices" data-l10n-id="byok-voices-load"
+				oncommand="Zotero.BYOKTTS.pane.loadVoices()"/>
+			<button id="byok-format-voices" data-l10n-id="byok-voices-tidy"
+				oncommand="Zotero.BYOKTTS.pane.tidyVoices()"/>
+		</hbox>
+	</groupbox>
+
+	<groupbox>
+		<label><html:h2 data-l10n-id="byok-style-heading"/></label>
+		<description class="byok-hint" data-l10n-id="byok-style-hint"/>
+
+		<html:textarea id="byok-style-prompt" rows="3" class="byok-wide"
+			preference="extensions.zotero.byokTTS.stylePrompt"/>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-style-mode" control="byok-style-mode"/>
+			<menulist id="byok-style-mode" native="true"
+				preference="extensions.zotero.byokTTS.styleMode">
+				<menupopup>
+					<menuitem value="prepend" data-l10n-id="byok-style-mode-prepend"/>
+					<menuitem value="instructions" data-l10n-id="byok-style-mode-instructions"/>
+				</menupopup>
+			</menulist>
+		</hbox>
+		<description class="byok-hint" data-l10n-id="byok-style-cache-hint"/>
+
+		<vbox>
+			<label data-l10n-id="byok-extra-body" control="byok-extra-body"/>
+			<html:textarea id="byok-extra-body" rows="3" class="byok-wide byok-mono"
+				preference="extensions.zotero.byokTTS.extraBody"/>
+		</vbox>
+		<description class="byok-hint" data-l10n-id="byok-extra-body-hint"/>
+	</groupbox>
+
+	<groupbox>
+		<label><html:h2 data-l10n-id="byok-reader-heading"/></label>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-tier" control="byok-tier"/>
+			<menulist id="byok-tier" native="true" preference="extensions.zotero.byokTTS.tier">
+				<menupopup>
+					<menuitem value="premium" data-l10n-id="byok-tier-premium"/>
+					<menuitem value="standard" data-l10n-id="byok-tier-standard"/>
+					<menuitem value="local" data-l10n-id="byok-tier-local"/>
+				</menupopup>
+			</menulist>
+		</hbox>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-granularity" control="byok-granularity"/>
+			<menulist id="byok-granularity" native="true"
+				preference="extensions.zotero.byokTTS.granularity">
+				<menupopup>
+					<menuitem value="sentence" data-l10n-id="byok-granularity-sentence"/>
+					<menuitem value="paragraph" data-l10n-id="byok-granularity-paragraph"/>
+				</menupopup>
+			</menulist>
+		</hbox>
+		<description class="byok-hint" data-l10n-id="byok-granularity-hint"/>
+
+		<checkbox id="byok-hide-zotero" data-l10n-id="byok-hide-zotero"
+			preference="extensions.zotero.byokTTS.hideZoteroVoices"/>
+		<description class="byok-hint" data-l10n-id="byok-hide-zotero-hint"/>
+	</groupbox>
+
+	<groupbox>
+		<label><html:h2 data-l10n-id="byok-skip-heading"/></label>
+		<description class="byok-hint" data-l10n-id="byok-skip-hint"/>
+
+		<checkbox data-l10n-id="byok-skip-frontMatter"
+			preference="extensions.zotero.byokTTS.skip.frontMatter"/>
+		<checkbox data-l10n-id="byok-skip-headersFooters"
+			preference="extensions.zotero.byokTTS.skip.headersFooters"/>
+		<checkbox data-l10n-id="byok-skip-footnotes"
+			preference="extensions.zotero.byokTTS.skip.footnotes"/>
+		<checkbox data-l10n-id="byok-skip-tables"
+			preference="extensions.zotero.byokTTS.skip.tables"/>
+		<checkbox data-l10n-id="byok-skip-formulas"
+			preference="extensions.zotero.byokTTS.skip.formulas"/>
+		<checkbox data-l10n-id="byok-skip-citations"
+			preference="extensions.zotero.byokTTS.skip.citations"/>
+		<checkbox data-l10n-id="byok-skip-urls"
+			preference="extensions.zotero.byokTTS.skip.urls"/>
+		<checkbox data-l10n-id="byok-skip-parens"
+			preference="extensions.zotero.byokTTS.skip.parens"/>
+		<checkbox data-l10n-id="byok-skip-brackets"
+			preference="extensions.zotero.byokTTS.skip.brackets"/>
+		<checkbox data-l10n-id="byok-skip-braces"
+			preference="extensions.zotero.byokTTS.skip.braces"/>
+		<description class="byok-hint" data-l10n-id="byok-skip-kinds-hint"/>
+
+		<separator class="thin"/>
+
+		<checkbox data-l10n-id="byok-skip-smooth"
+			preference="extensions.zotero.byokTTS.skip.smoothOrder"/>
+		<description class="byok-hint" data-l10n-id="byok-skip-smooth-hint"/>
+
+		<vbox>
+			<label data-l10n-id="byok-skip-custom" control="byok-skip-custom"/>
+			<html:textarea id="byok-skip-custom" rows="4" class="byok-wide byok-mono"
+				preference="extensions.zotero.byokTTS.skip.custom"/>
+		</vbox>
+		<description class="byok-hint" data-l10n-id="byok-skip-custom-hint"/>
+
+		<hbox>
+			<button id="byok-skip-report" data-l10n-id="byok-skip-diagnostics"
+				oncommand="Zotero.BYOKTTS.pane.openLogFolder()"/>
+		</hbox>
+	</groupbox>
+
+	<groupbox>
+		<label><html:h2 data-l10n-id="byok-log-heading"/></label>
+		<description class="byok-hint" data-l10n-id="byok-log-hint"/>
+
+		<checkbox id="byok-log-enabled" data-l10n-id="byok-log-enabled"
+			preference="extensions.zotero.byokTTS.log.enabled"/>
+
+		<hbox align="center">
+			<button id="byok-log-open" data-l10n-id="byok-log-open"
+				oncommand="Zotero.BYOKTTS.pane.openLogFolder()"/>
+			<button id="byok-log-tail" data-l10n-id="byok-log-tail"
+				oncommand="Zotero.BYOKTTS.pane.tailLog()"/>
+			<button id="byok-log-clear" data-l10n-id="byok-log-clear"
+				oncommand="Zotero.BYOKTTS.pane.clearLog()"/>
+		</hbox>
+		<description id="byok-log-path" class="byok-hint"/>
+	</groupbox>
+
+	<groupbox>
+		<label><html:h2 data-l10n-id="byok-maintenance-heading"/></label>
+		<hbox align="center">
+			<button id="byok-clear-cache" data-l10n-id="byok-clear-cache"
+				oncommand="Zotero.BYOKTTS.pane.clearCache()"/>
+			<button id="byok-last-error" data-l10n-id="byok-last-error"
+				oncommand="Zotero.BYOKTTS.pane.showLastError()"/>
+		</hbox>
+	</groupbox>
+</vbox>

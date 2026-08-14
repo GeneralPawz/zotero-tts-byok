@@ -804,9 +804,9 @@ Zotero.BYOKTTS = new function () {
 
 		await Zotero.PreferencePanes.register({
 			pluginID: 'byok-tts@local',
-			src: rootURI + 'prefsPane.xhtml',
-			scripts: [rootURI + 'prefsPane.js'],
-			stylesheets: [rootURI + 'prefsPane.css'],
+			src: rootURI + 'prefs/pane.xhtml',
+			scripts: [rootURI + 'prefs/pane.js'],
+			stylesheets: [rootURI + 'prefs/pane.css'],
 			label: 'Read Aloud BYOK'
 		});
 

@@ -1,0 +1,138 @@
+.byok-wide {
+	flex: 1;
+	min-width: 22em;
+}
+
+.byok-mono {
+	font-family: monospace;
+}
+
+.byok-hint {
+	opacity: 0.75;
+	font-size: 0.9em;
+	max-width: 46em;
+}
+
+.byok-error {
+	opacity: 1;
+	color: #cc2936;
+}
+
+/* Test bar — stays in view so settings can be changed anywhere and heard immediately */
+#byok-sticky {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	gap: 6px;
+	padding: 8px 0;
+	margin-bottom: 4px;
+	background: var(--material-background, Field);
+	border-bottom: 1px solid var(--fill-quinary, rgba(128, 128, 128, .25));
+}
+
+#byok-sticky #byok-test {
+	font-weight: 600;
+}
+
+#byok-status {
+	white-space: pre-wrap;
+	resize: vertical;
+	min-height: 1.4em;
+	width: 100%;
+}
+
+/* Rendered voice editor */
+.byok-voice-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr auto;
+	gap: 6px;
+	align-items: center;
+	padding: 2px 0;
+}
+
+.byok-voice-row input {
+	min-width: 0;
+	width: 100%;
+}
+
+.byok-voice-head {
+	font-size: .85em;
+	opacity: .7;
+	padding-bottom: 2px;
+}
+
+.byok-voice-remove {
+	background: none;
+	border: none;
+	cursor: default;
+	opacity: .6;
+	padding: 2px 6px;
+	border-radius: 4px;
+	color: inherit;
+}
+
+.byok-voice-remove:hover {
+	opacity: 1;
+	background: var(--fill-quinary, rgba(128, 128, 128, .2));
+}
+
+/*
+	JSON editor. A textarea cannot colour its own text, so a <pre> carrying the highlighted
+	copy sits underneath and the textarea is made transparent above it. Both must share the
+	exact same font, padding and wrapping or the caret drifts away from the glyphs.
+*/
+.byok-code {
+	position: relative;
+	width: 100%;
+}
+
+.byok-code > pre,
+.byok-code > textarea {
+	margin: 0;
+	padding: 6px 8px;
+	border-radius: 5px;
+	font-family: monospace;
+	font-size: 1em;
+	line-height: 1.45;
+	tab-size: 2;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	box-sizing: border-box;
+}
+
+.byok-code > pre {
+	position: absolute;
+	inset: 0;
+	overflow: auto;
+	pointer-events: none;
+	border: 1px solid transparent;
+	color: var(--fill-primary, CanvasText);
+}
+
+.byok-code > textarea {
+	position: relative;
+	width: 100%;
+	background: transparent;
+	color: transparent;
+	caret-color: var(--fill-primary, CanvasText);
+	resize: vertical;
+}
+
+.byok-code > textarea::selection {
+	background: Highlight;
+	color: HighlightText;
+}
+
+.byok-t-k { color: #7a3e9d; }   /* key */
+.byok-t-s { color: #1a7f37; }   /* string */
+.byok-t-n { color: #0550ae; }   /* number */
+.byok-t-b { color: #b35900; }   /* true / false / null */
+.byok-t-p { opacity: .55; }     /* punctuation */
+
+@media (prefers-color-scheme: dark) {
+	.byok-t-k { color: #d2a8ff; }
+	.byok-t-s { color: #7ee787; }
+	.byok-t-n { color: #79c0ff; }
+	.byok-t-b { color: #ffa657; }
+	.byok-error { color: #ff7b72; }
+}

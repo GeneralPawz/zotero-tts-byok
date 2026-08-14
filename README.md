@@ -10,6 +10,8 @@ bracketed asides — and stitches sentences broken across a page break back toge
 
 Requires Zotero 9. MIT licensed.
 
+![Provider settings](images/settings-provider.png)
+
 ## How it works
 
 Zotero's reader gets its voice catalog and its audio from the parent process through two methods on
@@ -155,6 +157,11 @@ has no container.
 
 ## Voice list format
 
+The Voices section has two views. **List** is a plain editor — one row per voice, with an add and
+a remove button — and is the one to use if JSON is not your thing. **JSON** is the same data raw,
+with syntax highlighting, for pasting a whole set at once. Both write the same setting, so you can
+switch between them freely.
+
 ```json
 [
   { "id": "nova", "label": "Nova", "locales": ["en", "de"] },
@@ -171,6 +178,8 @@ so `en-US` would hide the voice from an `en-GB` document. Tag the region only wh
 is region-specific, as Azure's neural voices are.
 
 ## Speaking style
+
+![Speaking style and reader integration](images/settings-style.png)
 
 Expressive models take direction in natural language. Gemini's convention is to put it in the text
 itself — `Say cheerfully: Have a wonderful day!` — and it also honours inline tags like
@@ -196,7 +205,35 @@ reading the instruction aloud, switch the chunk size to paragraphs.
 `{"provider":{"options":{"style":"cheerful","styledegree":1.5}}}` for Azure MAI-Voice-2 via
 OpenRouter.
 
+### Inline emotion tags
+
+Gemini reads bracketed tags inside your own text as performance direction rather than speaking
+them. These have been tested and work; they are ordinary English words, so spelling matters more
+than the brackets do.
+
+| Register | Tags |
+| --- | --- |
+| Amusement | `[laughing]`, `[silly]`, `[hysterical]` |
+| Joy | `[joyful]`, `[delighted]`, `[thrilled]`, `[ecstatic]` |
+| Yearning | `[longing]`, `[lust]` |
+| Surprise | `[surprised]`, `[startled]`, `[flabbergasted]` |
+| Displeasure | `[annoyed]`, `[bitter]`, `[angry]`, `[hostile]`, `[disgusted]` |
+| Delivery | `[whispering]` |
+
+Tags apply from where they appear until the mood shifts, so they can be mixed inside one passage:
+
+```
+[whispering] The manuscript had been missing for eighty years. [thrilled] And there it was.
+```
+
+They combine with the style prompt — the prompt sets the baseline register for everything, the
+tags move it locally. Since Zotero caches audio by voice and source text, tags placed in a
+document's own text are cached like any other reading; a changed **style prompt** is not, so clear
+the cached audio after editing it.
+
 ## Skip
+
+![Skip rules and the test bar](images/settings-skip.png)
 
 A **Skip** row is added to the reader's Read Aloud popup; clicking it reveals toggles for what to
 leave out. The same toggles are mirrored in this plugin's preferences pane.
@@ -268,11 +305,46 @@ last entries** prints the tail into the copyable status box, **Clear log** start
 The pane header shows the running plugin and Zotero versions, so it is always possible to confirm
 which build is actually loaded.
 
+## Project layout
+
+```
+src/            everything that ships inside the .xpi
+  manifest.json, bootstrap.js, prefs.js, icon.png
+  lib/          byok-tts.js, skip.js, log.js, readerUI.js
+  prefs/        pane.xhtml, pane.js, pane.css
+  locale/       en-US, de — picked up automatically by Zotero
+test/           node checks, not packaged
+images/         README screenshots
+target/         build output, gitignored
+```
+
+`build.ps1` stages `src/` and writes `target/read-aloud-byok.xpi`. It adds ZIP entries one at a
+time rather than using `CreateFromDirectory`, which on Windows writes subdirectory entries with a
+backslash — not a valid ZIP path separator, and Zotero rejects such a package with a generic "may
+be incompatible" message. The script fails the build if a backslash or a missing root
+`manifest.json` slips through.
+
+## Localisation
+
+Strings live in `src/locale/<locale>/read-aloud-byok.ftl`. Zotero scans every plugin's `locale/`
+directory and registers the files with the L10n registry itself, so no wiring is needed; the pane
+pulls them in with `MozXULElement.insertFTLIfNeeded` and uses `data-l10n-id`. Locales Zotero has
+but the plugin does not fall back to the closest match, then to `en-US`.
+
+To add a language, copy `en-US/read-aloud-byok.ftl` to `src/locale/<locale>/` and translate the
+values. `node test/check-l10n.js` reports any string that is missing, untranslated, or left over.
+
 ## Tests
 
-`node test/run-tests.js` exercises the skip rules against fixtures taken from real documents — an
-academic paper and a furniture-heavy standards page with a mangled library watermark. Every case
-came from a bug; they should stay passing.
+```
+node test/run-tests.js       skip rules, against fixtures from real documents
+node test/check-l10n.js      every string resolves in every locale; handlers exist
+node test/check-highlight.js the JSON highlighter round-trips exactly
+```
+
+The skip fixtures are an academic paper and a furniture-heavy standards page with a library
+watermark whose text extraction mangles differently on every page. Every case came from a bug;
+they should stay passing.
 
 ## Settings
 

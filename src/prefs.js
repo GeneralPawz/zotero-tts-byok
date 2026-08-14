@@ -31,6 +31,9 @@ pref("extensions.zotero.byokTTS.skip.custom", "");
 
 pref("extensions.zotero.byokTTS.log.enabled", false);
 
+// "list" (rendered editor) or "json" (raw, syntax-highlighted)
+pref("extensions.zotero.byokTTS.voicesView", "list");
+
 // "custom" provider only
 pref("extensions.zotero.byokTTS.custom.url", "");
 pref("extensions.zotero.byokTTS.custom.method", "POST");

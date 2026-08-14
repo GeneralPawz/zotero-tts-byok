@@ -11,7 +11,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const PREFS = {};
-for (let m of fs.readFileSync(path.join(ROOT, 'prefs.js'), 'utf8')
+for (let m of fs.readFileSync(path.join(ROOT, 'src', 'prefs.js'), 'utf8')
 	.matchAll(/^pref\("([^"]+)",\s*(.+)\);$/gm)) {
 	PREFS[m[1]] = JSON.parse(m[2]);
 }
@@ -26,7 +26,7 @@ const sandbox = {
 	}
 };
 vm.createContext(sandbox);
-vm.runInContext(fs.readFileSync(path.join(ROOT, 'skip.js'), 'utf8'), sandbox);
+vm.runInContext(fs.readFileSync(path.join(ROOT, 'src', 'lib', 'skip.js'), 'utf8'), sandbox);
 const Skip = sandbox.Zotero.BYOKTTS.Skip;
 
 let failures = 0;

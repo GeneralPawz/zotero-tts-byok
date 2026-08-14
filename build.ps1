@@ -1,43 +1,56 @@
-# Packages the plugin as read-aloud-byok.xpi.
+# Packages src/ as target/read-aloud-byok.xpi
 #
-# Files are staged flat first, on purpose. Zipping the source directory directly pulls in
-# test/ with a Windows path separator, and a backslash in a ZIP entry name is not valid —
-# Zotero refuses the install with a generic "may be incompatible" message.
+# Entries are added one at a time rather than with ZipFile::CreateFromDirectory, which on
+# Windows writes subdirectory entries with a backslash. A backslash is not a valid ZIP path
+# separator, and Zotero rejects such a package with a generic "may be incompatible" message.
 
 param(
-	[string] $OutFile = (Join-Path $PSScriptRoot 'read-aloud-byok.xpi')
+	[string] $Source = (Join-Path $PSScriptRoot 'src'),
+	[string] $TargetDir = (Join-Path $PSScriptRoot 'target')
 )
 
 $ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.IO.Compression
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-$manifest = Get-Content (Join-Path $PSScriptRoot 'manifest.json') -Raw | ConvertFrom-Json
+$manifest = Get-Content (Join-Path $Source 'manifest.json') -Raw | ConvertFrom-Json
 $version = $manifest.version
 
-$stage = Join-Path ([System.IO.Path]::GetTempPath()) ("byok-stage-" + [guid]::NewGuid())
-New-Item -ItemType Directory -Force $stage | Out-Null
+New-Item -ItemType Directory -Force $TargetDir | Out-Null
+$outFile = Join-Path $TargetDir 'read-aloud-byok.xpi'
+if (Test-Path $outFile) { Remove-Item $outFile -Force }
+
+$root = (Resolve-Path $Source).Path.TrimEnd('\')
+$files = Get-ChildItem $Source -File -Recurse |
+	Where-Object { $_.Extension -notin '.xpi', '.jsonl' -and -not $_.Name.StartsWith('.') }
+
+$zip = [System.IO.Compression.ZipFile]::Open($outFile, 'Create')
 try {
-	Get-ChildItem $PSScriptRoot -File -Force |
-		Where-Object {
-			$_.Extension -notin '.xpi', '.jsonl' -and
-			$_.Name -ne 'build.ps1' -and
-			-not $_.Name.StartsWith('.')
-		} |
-		Copy-Item -Destination $stage
-
-	if (Test-Path $OutFile) { Remove-Item $OutFile -Force }
-	Add-Type -AssemblyName System.IO.Compression.FileSystem
-	[System.IO.Compression.ZipFile]::CreateFromDirectory(
-		$stage, $OutFile, [System.IO.Compression.CompressionLevel]::Optimal, $false)
-
-	$zip = [System.IO.Compression.ZipFile]::OpenRead($OutFile)
-	$bad = @($zip.Entries | Where-Object { $_.FullName -match '\\' })
-	$count = $zip.Entries.Count
-	$zip.Dispose()
-	if ($bad.Count) { throw "ZIP contains $($bad.Count) entries with backslash separators" }
-
-	$size = [math]::Round((Get-Item $OutFile).Length / 1KB, 1)
-	Write-Output "built $OutFile  (v$version, $count entries, $size KB)"
+	# Ship the licence alongside the code
+	$license = Join-Path $PSScriptRoot 'LICENSE'
+	if (Test-Path $license) {
+		[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+			$zip, $license, 'LICENSE', [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
+	}
+	foreach ($file in $files) {
+		$name = $file.FullName.Substring($root.Length + 1).Replace('\', '/')
+		[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+			$zip, $file.FullName, $name, [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
+	}
 }
 finally {
-	Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
+	$zip.Dispose()
 }
+
+# manifest.json must sit at the archive root, and no entry may contain a backslash
+$check = [System.IO.Compression.ZipFile]::OpenRead($outFile)
+$names = $check.Entries | ForEach-Object { $_.FullName }
+$count = $check.Entries.Count
+$check.Dispose()
+
+$bad = @($names | Where-Object { $_ -match '\\' })
+if ($bad.Count) { throw "ZIP contains backslash separators: $($bad -join ', ')" }
+if ($names -notcontains 'manifest.json') { throw 'manifest.json is missing from the archive root' }
+
+$size = [math]::Round((Get-Item $outFile).Length / 1KB, 1)
+Write-Output "built $outFile  (v$version, $count entries, $size KB)"

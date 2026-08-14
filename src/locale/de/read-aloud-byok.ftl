@@ -1,0 +1,187 @@
+# Read Aloud BYOK — Einstellungen
+
+byok-test-now =
+    .label = Testsatz vorlesen
+byok-test-hint = Spielt die erste eingerichtete Stimme mit den aktuellen Einstellungen ab.
+
+## Anbieter
+
+byok-provider-heading = Anbieter
+byok-enabled =
+    .label = Eigenen Sprachausgabe-Anbieter für Vorlesen verwenden
+byok-enabled-hint = Ihre Stimmen erscheinen in der Stimmenauswahl des Readers unter der unten gewählten Stufe, neben Zoteros eigenen Stimmen. Erfordert eine Anmeldung bei einem Zotero-Konto.
+byok-provider = Anbieter
+byok-provider-openai =
+    .label = OpenAI-kompatibel (OpenAI, OpenRouter, Groq, Kokoro…)
+byok-provider-elevenlabs =
+    .label = ElevenLabs
+byok-provider-speechify =
+    .label = Speechify
+byok-provider-azure =
+    .label = Azure Speech
+byok-provider-google =
+    .label = Google Gemini TTS
+byok-provider-custom =
+    .label = Eigener Endpunkt
+byok-base-url = Basis-URL
+byok-base-url-azure = Region oder Endpunkt-URL
+byok-api-key = API-Schlüssel
+byok-api-key-hint = Wird im Klartext in der prefs.js Ihres Zotero-Profils gespeichert, wie andere Plugin-Einstellungen auch.
+byok-model = Modell
+byok-audio-format = Audioformat
+byok-audio-format-pcm =
+    .label = pcm (in WAV verpackt)
+byok-pcm-rate = PCM-Abtastrate
+byok-pcm-hint = Manche Modelle liefern PCM ohne Header und lehnen jedes andere Format ab — Googles Gemini TTS über OpenRouter gehört dazu. Wählen Sie dort pcm; ein WAV-Header wird für den Reader ergänzt. 24000 passt zu Gemini und OpenAI; klingt die Sprache zu schnell oder zu langsam, ist dies der Wert zum Ändern.
+
+## Eigener Endpunkt
+
+byok-custom-heading = Eigener Endpunkt
+byok-custom-hint = Platzhalter: {"{{"}text{"}}"}, {"{{"}voice{"}}"}, {"{{"}model{"}}"}, {"{{"}lang{"}}"}, {"{{"}key{"}}"}.
+byok-custom-method = Methode
+byok-custom-url = Anfrage-URL
+byok-custom-headers = Header (JSON)
+byok-custom-body = Anfrage-Body (JSON)
+byok-custom-audio-path = Audio-Pfad in der JSON-Antwort
+byok-custom-audio-path-hint = Leer lassen, wenn der Endpunkt rohe Audiodaten liefert. Sonst einen Punktpfad zu einem Base64-String angeben, z. B. candidates.0.content.parts.0.inlineData.data
+byok-custom-mime = MIME-Typ der Antwort
+byok-custom-pcm = Abtastrate für rohes PCM
+byok-custom-pcm-hint = 0, außer die Base64-Daten sind 16-Bit-Mono-PCM ohne Header — dann die Abtastrate angeben (z. B. 24000), damit ein WAV-Header ergänzt wird.
+
+## Stimmen
+
+byok-voices-heading = Stimmen
+byok-voices-hint = Die ID ist der Name, den Ihr Anbieter der Stimme gibt; die Sprachen steuern, für welche Reader-Sprachen sie angeboten wird. Für mehrsprachige Stimmen einen reinen Sprachcode wie en oder de verwenden — eine Stimme mit Regionsangabe wird nur für genau diese Region angeboten.
+byok-voices-view-list =
+    .label = Liste
+byok-voices-view-json =
+    .label = JSON
+byok-voices-add =
+    .label = Stimme hinzufügen
+byok-voices-load =
+    .label = Vom Anbieter laden…
+byok-voices-tidy =
+    .label = JSON aufräumen
+byok-voices-col-id = Stimmen-ID
+byok-voices-col-label = Name
+byok-voices-col-locales = Sprachen
+byok-voices-remove =
+    .tooltiptext = Diese Stimme entfernen
+byok-voices-empty = Noch keine Stimmen. Fügen Sie eine hinzu oder laden Sie sie vom Anbieter.
+
+## Sprechstil
+
+byok-style-heading = Sprechstil
+byok-style-hint = Anweisung, wie der Text vorgetragen werden soll — Ton, Tempo, Stimmung. Gemini beachtet außerdem Inline-Tags wie [whispers] oder [excited] in Ihrem eigenen Text.
+byok-style-mode = Senden
+byok-style-mode-prepend =
+    .label = vor jedem Abschnitt (Gemini, die meisten Modelle)
+byok-style-mode-instructions =
+    .label = als instructions-Feld (OpenAI)
+byok-style-cache-hint = Zotero speichert Audio je Stimme und Quelltext zwischen; der Stilprompt gehört nicht zum Cache-Schlüssel. Nach einer Änderung „Zwischengespeichertes Audio löschen“ verwenden, sonst hören Sie weiter den alten Vortrag. Absätze folgen der Anweisung zuverlässiger als einzelne Sätze.
+byok-extra-body = Zusätzliches Anfrage-JSON (wird in den Body eingefügt)
+byok-extra-body-hint = Für anbieterspezifische Optionen, z. B. reicht OpenRouter {"{"}"provider":{"{"}"options":{"{"}"style":"cheerful"{"}"}{"}"}{"}"} an Azure MAI-Voice-2 weiter.
+
+## Reader-Integration
+
+byok-reader-heading = Reader-Integration
+byok-tier = Stimmen anzeigen unter
+byok-tier-premium =
+    .label = Premium
+byok-tier-standard =
+    .label = Standard
+byok-tier-local =
+    .label = Lokal
+byok-granularity = Text senden in Abschnitten von
+byok-granularity-sentence =
+    .label = einem Satz
+byok-granularity-paragraph =
+    .label = einem Absatz
+byok-granularity-hint = Sätze beginnen früher zu spielen und markieren präzise mit. Absätze klingen natürlicher und verursachen weniger Anfragen, puffern aber länger.
+byok-hide-zotero =
+    .label = Zoteros eigene Standard- und Premium-Stimmen ausblenden
+byok-hide-zotero-hint = Verhindert, dass Ihr verbleibendes Zotero-Guthaben versehentlich verbraucht wird. Lokale Systemstimmen bleiben erhalten.
+
+## Überspringen
+
+byok-skip-heading = Überspringen
+byok-skip-hint = Dieselben Schalter erscheinen unter „Überspringen“ im Vorlesen-Fenster des Readers. Übersprungene Stellen bleiben markiert, bleiben aber stumm und werden nie an Ihren Anbieter gesendet.
+byok-skip-frontMatter =
+    .label = Titel und Autoren
+byok-skip-headersFooters =
+    .label = Kopf- und Fußzeilen
+byok-skip-footnotes =
+    .label = Fußnoten
+byok-skip-tables =
+    .label = Tabellen
+byok-skip-formulas =
+    .label = Formeln
+byok-skip-citations =
+    .label = Zitationen
+byok-skip-urls =
+    .label = URLs und DOIs
+byok-skip-parens =
+    .label = Text in ( )
+byok-skip-brackets =
+    .label = Text in [ ]
+byok-skip-braces =
+    .label = Text in { "{" } { "}" }
+byok-skip-kinds-hint = Die ersten fünf werten das Seitenlayout aus und arbeiten heuristisch; die letzten fünf sind exakte Textregeln. Nach Änderungen unten das zwischengespeicherte Audio löschen, da Zotero nach Quelltext zwischenspeichert.
+byok-skip-smooth =
+    .label = Übersprungene Stellen aus der Lesereihenfolge entfernen und getrennte Sätze zusammenfügen
+byok-skip-smooth-hint = Schreibt beim Öffnen eines Dokuments die Segmentliste des Readers um, sodass die Wiedergabe nie an übersprungenen Stellen stockt und ein über den Seitenumbruch getrennter Satz als einer gelesen wird. Da dies beim Öffnen geschieht, wirken Änderungen an den Überspringen-Einstellungen erst beim nächsten Öffnen des Dokuments. Ausschalten, um übersprungene Stellen stattdessen stumm zu überspielen.
+byok-skip-custom = Zeilen immer überspringen, die Folgendes enthalten (eine pro Zeile)
+byok-skip-custom-hint = Einfacher Text, Groß-/Kleinschreibung egal, überall im Abschnitt gesucht — für Wasserzeichen und Bibliotheksstempel, die sich unregelmäßig wiederholen, z. B. Firmenname: oder _ip_user_
+byok-skip-diagnostics =
+    .label = Diagnose zum Überspringen
+
+## Protokollierung
+
+byok-log-heading = Protokollierung
+byok-log-hint = Zeichnet die laufende Version, Ihre Einstellungen, die Messwerte jedes Dokuments, das Ergebnis der Umschreibung der Lesereihenfolge, jede Überspringen-Entscheidung samt zugrunde liegender Regel und jede an den Anbieter gesendete Anfrage auf. Ihr API-Schlüssel wird nie geschrieben — nur, ob einer gesetzt ist.
+byok-log-enabled =
+    .label = Diagnoseprotokoll schreiben (JSONL)
+byok-log-open =
+    .label = Protokollordner öffnen
+byok-log-tail =
+    .label = Letzte Einträge anzeigen
+byok-log-clear =
+    .label = Protokoll leeren
+byok-log-path = Protokolldatei: { $path }
+
+## Wartung
+
+byok-maintenance-heading = Wartung
+byok-clear-cache =
+    .label = Zwischengespeichertes Audio löschen
+byok-last-error =
+    .label = Letzten Reader-Fehler anzeigen
+byok-copy-message =
+    .label = Meldung kopieren
+byok-copied = Kopiert
+
+## Statusmeldungen
+
+byok-msg-loading-voices = Stimmen werden geladen …
+byok-msg-voices-loaded = { $count } Stimme(n) geladen.
+byok-msg-voices-none = Der Anbieter hat keine Stimmen zurückgegeben.
+byok-msg-voices-failed = Stimmen konnten nicht geladen werden: { $detail }
+byok-msg-json-invalid = Die Stimmenliste ist kein gültiges JSON.
+byok-msg-json-fix-first = Beheben Sie das JSON, bevor Sie in der Listenansicht Stimmen hinzufügen.
+byok-msg-json-invalid-list = Die Stimmenliste ist kein gültiges JSON. Wechseln Sie zur JSON-Ansicht, um sie zu korrigieren.
+byok-msg-voices-configured = { $count } Stimme(n) eingerichtet.
+byok-msg-need-voice = Richten Sie zuerst mindestens eine Stimme ein.
+byok-msg-requesting = Hörprobe von { $voice } wird angefordert …
+byok-msg-no-audio = Der Anbieter hat kein Audio zurückgegeben.
+byok-msg-playing = { $kb } KB { $type } von { $voice } werden abgespielt.
+byok-msg-test-failed = Test fehlgeschlagen: { $detail }
+byok-msg-cache-cleared = Zwischengespeichertes Vorlese-Audio gelöscht.
+byok-msg-cache-failed = Cache konnte nicht geleert werden: { $detail }
+byok-msg-no-errors = Seit dem Start von Zotero wurden keine Wiedergabefehler aufgezeichnet.
+byok-msg-log-empty = Das Protokoll ist leer.
+byok-msg-log-none-yet = Noch kein Protokoll — Protokollierung einschalten, PDF erneut öffnen und kurz abspielen.
+byok-msg-log-cleared = Protokoll geleert. Öffnen Sie das PDF erneut, um einen frischen Durchlauf aufzuzeichnen.
+byok-msg-log-tail = { $path }
+    { $entries } Einträge, letzte 40:
+byok-msg-log-unreadable = Protokoll konnte nicht gelesen werden: { $detail }
+byok-msg-folder-failed = Ordner konnte nicht geöffnet werden: { $detail }
