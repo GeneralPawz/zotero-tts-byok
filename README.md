@@ -47,12 +47,35 @@ shows which build is actually running.
 If a PDF tab is already open, close and reopen it — the voice list is fetched when the reader
 initialises.
 
-## About the update URL
+## Updates
 
-Zotero refuses to install any plugin whose manifest lacks `applications.zotero.update_url`, and
-disables one whose update URL isn't `https:` — a non-HTTPS one does not merely skip updates, it
-marks the add-on as broken. The manifest points at `update.json` in this repository, which in turn
-points at the current release asset. Bumping a version means editing both.
+Zotero updates the plugin itself. It polls the `update_url` in the manifest — `update.json` in
+this repository — and offers whatever version that file advertises, so a new GitHub release
+reaches existing installs without anyone downloading an `.xpi`. Tools → Plugins → gear icon →
+**Check for Updates** forces a check.
+
+Two details Zotero's `AddonUpdateChecker` insists on: the compatibility entry must be under
+`applications.zotero` — an update advertised under Firefox's `gecko` key is silently skipped —
+and `update_url` must be `https:`, or the add-on is marked broken rather than merely not updated.
+
+`update.json` also carries a `sha256` of the release asset, so a truncated or tampered download
+is rejected instead of installed.
+
+### Cutting a release
+
+Bump `version` in `src/manifest.json`, then:
+
+```
+git tag v1.7.0 && git push origin v1.7.0
+```
+
+`.github/workflows/release.yml` takes it from there: it refuses the tag if it disagrees with the
+manifest, runs the four test suites, builds, publishes the release with the `.xpi` attached,
+regenerates `update.json` with the new version, link and hash, and commits it to `main` — which
+is the moment existing installs start seeing the update.
+
+To do it by hand, `.\build.ps1` then
+`node scripts/make-update-manifest.mjs v1.7.0` produces the same `update.json`.
 
 ## Requirements
 
@@ -305,6 +328,25 @@ last entries** prints the tail into the copyable status box, **Clear log** start
 The pane header shows the running plugin and Zotero versions, so it is always possible to confirm
 which build is actually loaded.
 
+## Getting it listed
+
+Zotero has no plugin directory yet. Its own
+[plugins page](https://www.zotero.org/support/plugins) says so outright — "We don't currently
+provide a list of available plugins" — and points at the forums, with an official directory
+"planned". So there is nothing to submit to there, and no wiki entry to add.
+
+What exists in the meantime:
+
+| Where | What it is |
+| --- | --- |
+| [Zotero Forums](https://forums.zotero.org/) | Where plugins are actually announced and found |
+| [syt2/zotero-addons-scraper](https://github.com/syt2/zotero-addons-scraper) | Feeds the Zotero Addons in-app browser; takes submissions |
+| [zotero-plugin-dev/zotero-plugin-registry](https://github.com/zotero-plugin-dev/zotero-plugin-registry) | Work in progress; aggregates self-hosted `update.json` files |
+
+Both registries read the same `update.json` this repository already publishes, so the plugin is
+ready to be listed as soon as an entry is submitted. They are expected to fold into the official
+directory when it arrives.
+
 ## Project layout
 
 ```
@@ -314,6 +356,8 @@ src/            everything that ships inside the .xpi
   prefs/        pane.xhtml, pane.js, pane.css
   locale/       en-US, de — picked up automatically by Zotero
 test/           node checks, not packaged
+scripts/        make-update-manifest.mjs
+.github/        CI on every push, release on every v* tag
 images/         README screenshots
 target/         build output, gitignored
 ```

@@ -1,0 +1,77 @@
+name: Release
+
+# Tag a commit and everything else follows: tests, build, GitHub release, and the
+# update.json that Zotero polls to offer the new version to existing installs.
+#
+#   git tag v1.7.0 && git push origin v1.7.0
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # A tag that disagrees with the manifest would ship a package Zotero never
+      # offers as an update, because the version it advertises would not match.
+      - name: Check the tag against the manifest
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}' -replace '^v', ''
+          $version = (Get-Content src/manifest.json -Raw | ConvertFrom-Json).version
+          if ($tag -ne $version) {
+            throw "tag $tag does not match manifest version $version"
+          }
+          Write-Output "tag and manifest agree on $version"
+
+      - name: Tests
+        run: |
+          node test/run-tests.js
+          node test/check-l10n.js
+          node test/check-highlight.js
+          node test/check-pane.js
+
+      - name: Build
+        shell: pwsh
+        run: ./build.ps1
+
+      - name: Generate update.json
+        run: node scripts/make-update-manifest.mjs ${{ github.ref_name }} "${{ runner.temp }}/update.json"
+
+      - name: Publish the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            target/read-aloud-byok.xpi \
+            --title "${{ github.ref_name }}" \
+            --generate-notes
+
+      # update_url points at this file on main, so existing installs only see the
+      # new version once it lands there.
+      - name: Point update.json at the new release
+        shell: bash
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git checkout -B main origin/main
+          cp "${{ runner.temp }}/update.json" update.json
+          if git diff --quiet -- update.json; then
+            echo 'update.json already current'
+            exit 0
+          fi
+          git add update.json
+          git commit -m 'Point update.json at ${{ github.ref_name }} [skip ci]'
+          git push origin main
