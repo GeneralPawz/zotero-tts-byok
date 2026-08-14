@@ -56,6 +56,13 @@ pref("extensions.zotero.byokTTS.speakers.default", "");
 
 // Rotating voices over a document that carries no speaker tags: off, sentence, paragraph,
 // page or section. Needs at least two voices in the rotation to do anything.
+// How a document is voiced. Exactly one of these is in force at a time:
+//   narrator  — one voice throughout, with a sentiment we supply
+//   podcast   — voices take turns, for documents never written for this
+//   audiobook — [Theo] [whispering] in the text picks the voice and the mood
+pref("extensions.zotero.byokTTS.mode", "podcast");
+pref("extensions.zotero.byokTTS.sentiment", "");
+
 pref("extensions.zotero.byokTTS.cast.mode", "off");
 pref("extensions.zotero.byokTTS.cast.voices", "[]");
 

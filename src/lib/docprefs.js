@@ -20,6 +20,8 @@ Zotero.BYOKTTS.DocPrefs = new function () {
 		to Zotero.Prefs, which is what makes this safe to put behind the ordinary getPref().
 	*/
 	this.KEYS = [
+		'mode',
+		'sentiment',
 		'granularity',
 		'stylePrompt',
 		'speakers',

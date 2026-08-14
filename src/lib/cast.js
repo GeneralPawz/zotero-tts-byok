@@ -60,6 +60,9 @@ Zotero.BYOKTTS.Cast = new function () {
 
 	/** One voice is not a rotation, so two is the minimum for the feature to do anything. */
 	this.enabled = function () {
+		// Only podcast mode rotates; narrator and audiobook decide the voice another way, and a
+		// rotation left configured from a previous mode must not leak into them
+		if (Zotero.BYOKTTS.mode() !== 'podcast') return false;
 		return this.mode() !== 'off' && this.voices().length >= 2;
 	};
 

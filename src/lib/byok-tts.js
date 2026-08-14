@@ -75,6 +75,18 @@ Zotero.BYOKTTS = new function () {
 		return Zotero.Prefs.set(PREF + key, value, true);
 	};
 
+	/**
+	 * Which of the three reading modes is in force for the document being read. They are
+	 * mutually exclusive by construction rather than by three toggles agreeing to be exclusive:
+	 * one value decides, so there is no state in which two are half-on.
+	 */
+	this.MODES = ['narrator', 'podcast', 'audiobook'];
+
+	this.mode = function () {
+		let mode = this.getPref('mode');
+		return this.MODES.includes(mode) ? mode : 'podcast';
+	};
+
 	this.isEnabled = function () {
 		return !!this.getPref('enabled') && this.getVoices().length > 0;
 	};
@@ -351,7 +363,11 @@ Zotero.BYOKTTS = new function () {
 		let voices = this.getVoices();
 		let match = /^\s*\[([^\]]+)\]\s*/.exec(text);
 
-		if (match && speakers.length) {
+		let mode = this.mode();
+
+		// A tagged line is only a character's line in audiobook mode; in the others the tag is
+		// document furniture and the skip rules deal with it
+		if (mode === 'audiobook' && match && speakers.length) {
 			let name = match[1].trim().toLowerCase();
 			let speaker = speakers.find(s => String(s.tag).toLowerCase() === name);
 			if (speaker) {
@@ -363,13 +379,15 @@ Zotero.BYOKTTS = new function () {
 		// Nothing claimed this line. A document that carries no tags at all can still be given
 		// more than one voice by rotating them over its structure, which is what most documents
 		// need — a standard cannot be tagged for a cast that was never written into it.
-		let cast = this.Cast?.voiceFor(segment);
-		if (cast) return { voice: cast, text };
+		if (mode === 'podcast') {
+			let cast = this.Cast?.voiceFor(segment);
+			if (cast) return { voice: cast, text };
+		}
 
 		// Everything not claimed by a speaker — narration, headings — can have a voice of its
 		// own, so a story reads as a narrator plus its characters rather than one voice doing
 		// all of it.
-		let fallback = this.getPref('speakers.default');
+		let fallback = mode === 'audiobook' ? this.getPref('speakers.default') : '';
 		if (fallback) {
 			let voice = voices.find(v => v.id === fallback);
 			if (voice) return { voice, text };
@@ -746,14 +764,13 @@ Zotero.BYOKTTS = new function () {
 					let withVoices = models
 						.filter(m => (m.supported_voices || []).length)
 						.map(m => `${m.id} (${m.supported_voices.length})`);
+					let alternatives = withVoices.length
+						? ' Models that do publish voices: ' + withVoices.join(', ')
+						: '';
 					throw new Error(
 						`OpenRouter publishes no voice list for "${wanted}" — this model takes a voice `
 						+ 'id or reference audio of your own, so enter one by hand.'
-						+ (withVoices.length
-							? '
-
-Models that do publish voices: ' + withVoices.join(', ')
-							: '')
+						+ alternatives
 					);
 				}
 				return names.map(id => ({
