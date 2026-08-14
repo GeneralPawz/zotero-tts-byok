@@ -28,7 +28,8 @@ const zotero = manifest.applications?.zotero;
 if (!zotero?.id) throw new Error('src/manifest.json has no applications.zotero.id');
 
 const tag = tagArg || `v${manifest.version}`;
-if (tag.replace(/^v/, '') !== manifest.version) {
+// Stable tags are v1.16.0, dev-channel tags dev-v1.16.0.1; both name the manifest version
+if (tag.replace(/^(dev-)?v/, '') !== manifest.version) {
 	throw new Error(`tag ${tag} does not match manifest version ${manifest.version}`);
 }
 
