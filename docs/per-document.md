@@ -5,6 +5,32 @@ own.
 
 [← Read Aloud BYOK](../README.md)
 
+## Three modes
+
+A document is read in exactly one of three modes. They are one setting rather than three
+toggles, so there is no state in which two are half-on, and the panel shows which is in force
+before it shows anything else.
+
+| Mode | For | What decides the voice |
+| --- | --- | --- |
+| **Narrator** | Anything you want read plainly | One voice throughout, in a **sentiment** you choose from the tested tags |
+| **Podcast** (default) | Papers, standards, reports — documents never written to be performed | Voices take turns over a unit you pick: sentence, paragraph, page or section |
+| **Audiobook** | Documents written with tags | `[Theo] [whispering]` in the text picks both the voice and the mood |
+
+Choosing one puts the others aside. A rotation configured during a spell in Podcast does not go
+on rotating underneath Narrator, and speaker tags are only read as speaker tags in Audiobook —
+elsewhere they are ordinary brackets and the skip rules deal with them.
+
+**Sentiment** is Narrator's alone. Audiobook documents carry their direction in the text already,
+and overriding that from a setting would fight the tags rather than help them; Podcast gets its
+variety from the voices. Where a provider takes direction as a field rather than inline, the
+sentiment is spelled out as a sentence rather than passed as a bracketed tag, because a tag in an
+instructions field is direction to some models and a literal string to read aloud to others.
+
+Switching to Podcast with nothing to rotate would leave one voice reading everything, which looks
+like the mode not working, so the rotation is seeded with your first two voices. It is an ordinary
+override — the dot beside it reverts it.
+
 ## The sliders button
 
 Open a PDF and look in the reader toolbar, next to Zotero's Read Aloud button. The **sliders**
@@ -15,10 +41,9 @@ holds the things Zotero has no concept of:
 
 | Section | What is in it |
 | --- | --- |
+| Mode | Narrator, Podcast or Audiobook, and whichever settings that mode uses |
 | Reading | Sentence or paragraph chunks |
 | Skip | The ten rules, the reading-order rewrite, and custom patterns |
-| Alternating voices | The rotation unit and which voices take turns |
-| Speakers | Tag → voice, and the voice for untagged text |
 
 ## How a document disagrees
 

@@ -64,6 +64,22 @@ Zotero.BYOKTTS.ReaderUI = new function () {
 		}
 		.byok-revert[hidden] { visibility: hidden; display: inline-block; }
 		.byok-note { opacity: .6; font-size: 11px; padding-top: 6px; line-height: 1.35; }
+		.byok-warn { opacity: .95; color: var(--accent-red, #db2c3a); }
+		/* The mode in force is the first thing the panel should answer */
+		.byok-modes { display: flex; flex-direction: column; gap: 2px; }
+		.byok-mode {
+			display: flex; align-items: flex-start; gap: 7px; padding: 5px 6px;
+			border-radius: 4px; cursor: default; border: 1px solid transparent;
+		}
+		.byok-mode:hover { background: var(--fill-quinary, rgba(128,128,128,.12)); }
+		.byok-mode input { margin: 2px 0 0; flex-shrink: 0; }
+		.byok-mode span { display: block; }
+		.byok-mode-name { font-weight: 600; }
+		.byok-mode-hint { opacity: .62; font-size: 11px; line-height: 1.3; }
+		.byok-mode-on {
+			background: var(--fill-quinary, rgba(128,128,128,.16));
+			border-color: var(--fill-quarternary, rgba(128,128,128,.35));
+		}
 		.byok-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 4px; padding: 1px 0; }
 		.byok-row input, .byok-row select { min-width: 0; font: inherit; }
 		.byok-add { background: none; border: 1px solid var(--fill-quinary, rgba(128,128,128,.4));
@@ -90,6 +106,19 @@ Zotero.BYOKTTS.ReaderUI = new function () {
 		'byok-doc-speakers-add': 'Add speaker',
 		'byok-doc-default-voice': 'Voice for untagged text',
 		'byok-doc-revert': 'Back to the global default',
+		'byok-doc-section-mode': 'Mode',
+		'byok-doc-mode-narrator': 'Narrator',
+		'byok-doc-mode-narrator-hint': 'One voice throughout, in a mood you choose.',
+		'byok-doc-mode-podcast': 'Podcast',
+		'byok-doc-mode-podcast-hint': 'Voices take turns, for documents never written for it — '
+			+ 'papers, standards, reports.',
+		'byok-doc-mode-audiobook': 'Audiobook',
+		'byok-doc-mode-audiobook-hint': '[Theo] [whispering] in the text picks the voice and the '
+			+ 'mood. Needs a document written with tags.',
+		'byok-doc-sentiment': 'Sentiment',
+		'byok-doc-sentiment-none': 'Plain — no direction',
+		'byok-doc-cast-needs-two': 'Add a second voice, or one voice reads everything.',
+		'byok-doc-speakers-needed': 'No speakers set, so every line uses the voice for untagged text.',
 		'byok-doc-note': 'These apply to this document only. Newly skipped text goes silent at '
 			+ 'once; text already pruned from the reading order comes back when the document is '
 			+ 'reopened.'
@@ -355,6 +384,38 @@ Zotero.BYOKTTS.ReaderUI = new function () {
 			panel.append(heading);
 		};
 
+		/*
+			The mode comes first and only its own controls follow it. Three sets of settings all
+			visible at once invites the question the modes exist to answer — which of these is
+			actually in force — so the ones that do not apply are not merely disabled, they are
+			not drawn.
+		*/
+		let mode = this._value('mode') || 'podcast';
+		section('byok-doc-section-mode');
+		panel.append(this._modes(doc, mode, refresh));
+
+		if (mode === 'narrator') {
+			panel.append(this._select(doc, 'sentiment', this._string('byok-doc-sentiment'),
+				[['', this._string('byok-doc-sentiment-none')]].concat(this._sentiments()), refresh));
+		}
+		else if (mode === 'podcast') {
+			panel.append(this._select(doc, 'cast.mode', this._string('byok-doc-cast-mode'), [
+				['sentence', 'Sentence'], ['paragraph', 'Paragraph'],
+				['page', 'Page'], ['section', 'Section']
+			], refresh));
+			panel.append(this._field(doc, 'cast.voices', this._castRotation(doc, refresh), refresh));
+			// Two voices is the minimum for a rotation, and silently reading in one instead is
+			// the sort of thing that looks like the feature is broken
+			let ids = this._list('cast.voices');
+			if (ids.length < 2) panel.append(this._warn(doc, 'byok-doc-cast-needs-two'));
+		}
+		else {
+			panel.append(this._field(doc, 'speakers', this._speakerRows(doc, refresh), refresh));
+			panel.append(this._select(doc, 'speakers.default', this._string('byok-doc-default-voice'),
+				[['', '—']].concat(this._voiceOptions()), refresh));
+			if (!this._list('speakers').length) panel.append(this._warn(doc, 'byok-doc-speakers-needed'));
+		}
+
 		section('byok-doc-section-reading');
 		panel.append(this._select(doc, 'granularity', this._string('byok-doc-granularity'),
 			[['sentence', 'Sentence'], ['paragraph', 'Paragraph']], refresh));
@@ -366,24 +427,95 @@ Zotero.BYOKTTS.ReaderUI = new function () {
 		panel.append(this._checkbox(doc, 'skip.smoothOrder', this._string('byok-doc-smooth'), refresh));
 		panel.append(this._textarea(doc, 'skip.custom', this._string('byok-doc-custom'), refresh));
 
-		section('byok-doc-section-cast');
-		panel.append(this._select(doc, 'cast.mode', this._string('byok-doc-cast-mode'), [
-			['off', 'Off — one voice'], ['sentence', 'Sentence'], ['paragraph', 'Paragraph'],
-			['page', 'Page'], ['section', 'Section']
-		], refresh));
-		if (this._value('cast.mode') !== 'off') {
-			panel.append(this._field(doc, 'cast.voices', this._castRotation(doc, refresh), refresh));
-		}
-
-		section('byok-doc-section-speakers');
-		panel.append(this._field(doc, 'speakers', this._speakerRows(doc, refresh), refresh));
-		panel.append(this._select(doc, 'speakers.default', this._string('byok-doc-default-voice'),
-			[['', '—']].concat(this._voiceOptions()), refresh));
-
 		let note = doc.createElement('div');
 		note.className = 'byok-note';
 		note.textContent = this._string('byok-doc-note');
 		panel.append(note);
+	};
+
+	/** A JSON-list setting, parsed defensively. */
+	this._list = function (key) {
+		try {
+			let parsed = JSON.parse(this._value(key) || '[]');
+			return Array.isArray(parsed) ? parsed : [];
+		}
+		catch (e) {
+			return [];
+		}
+	};
+
+	this._warn = function (doc, id) {
+		let node = doc.createElement('div');
+		node.className = 'byok-note byok-warn';
+		node.textContent = this._string(id);
+		return node;
+	};
+
+	/** The eighteen tested tags, grouped as they are everywhere else. */
+	this._sentiments = function () {
+		return Zotero.BYOKTTS.EMOTIONS.flatMap(([, tags]) => tags).map(tag => [tag, tag]);
+	};
+
+	/**
+	 * The three modes as one exclusive choice. Radio inputs rather than checkboxes because that
+	 * is what mutual exclusion looks like, and the one in force is spelled out under the group
+	 * rather than left to be inferred from which dot is filled.
+	 */
+	this._modes = function (doc, current, refresh) {
+		const MODES = [
+			['narrator', 'byok-doc-mode-narrator', 'byok-doc-mode-narrator-hint'],
+			['podcast', 'byok-doc-mode-podcast', 'byok-doc-mode-podcast-hint'],
+			['audiobook', 'byok-doc-mode-audiobook', 'byok-doc-mode-audiobook-hint']
+		];
+		let host = doc.createElement('div');
+		host.className = 'byok-modes';
+
+		for (let [value, labelID, hintID] of MODES) {
+			let option = doc.createElement('label');
+			option.className = 'byok-mode' + (value === current ? ' byok-mode-on' : '');
+			let radio = doc.createElement('input');
+			radio.type = 'radio';
+			radio.name = 'byok-mode';
+			radio.value = value;
+			radio.checked = value === current;
+			radio.addEventListener('change', () => {
+				if (radio.checked) this._chooseMode(value, refresh);
+			});
+			let text = doc.createElement('span');
+			let name = doc.createElement('span');
+			name.className = 'byok-mode-name';
+			name.textContent = this._string(labelID);
+			let hint = doc.createElement('span');
+			hint.className = 'byok-mode-hint';
+			hint.textContent = this._string(hintID);
+			text.append(name, hint);
+			option.append(radio, text);
+			host.append(option);
+		}
+
+		let revert = doc.createElement('button');
+		revert.className = 'byok-revert';
+		revert.textContent = '●';
+		revert.title = this._string('byok-doc-revert');
+		revert.hidden = !this._overridden('mode');
+		revert.addEventListener('click', () => this._unset('mode', refresh));
+		host.append(revert);
+		return host;
+	};
+
+	/**
+	 * Switching to podcast with nothing to rotate would leave one voice reading everything, which
+	 * reads as the mode not working. Seeding the rotation from the configured voices makes the
+	 * choice do what it says; it is an ordinary override and the dot reverts it.
+	 */
+	this._chooseMode = function (mode, refresh) {
+		Zotero.BYOKTTS.DocPrefs.set('mode', mode);
+		if (mode === 'podcast' && this._list('cast.voices').length < 2) {
+			let voices = this._voiceOptions().slice(0, 2).map(([id]) => id);
+			if (voices.length === 2) Zotero.BYOKTTS.DocPrefs.set('cast.voices', JSON.stringify(voices));
+		}
+		Zotero.BYOKTTS.clearAudioCache().catch(e => Zotero.logError(e));
+		if (refresh) refresh();
 	};
 
 	/* ------------------------------------------------------------- injection */

@@ -18,6 +18,8 @@ for (let m of fs.readFileSync(path.join(ROOT, 'src', 'prefs.js'), 'utf8').replac
 	PREFS[m[1]] = JSON.parse(m[2]);
 }
 
+let MODE = 'podcast';
+
 const VOICES = [
 	{ id: 'kore', label: 'Kore', locales: ['en'] },
 	{ id: 'puck', label: 'Puck', locales: ['en'] },
@@ -33,7 +35,9 @@ const sandbox = {
 		BYOKTTS: {
 			emotionTags: () => [],
 			speakerTags: () => [],
-			getVoices: () => VOICES
+			getVoices: () => VOICES,
+			// The rotation only runs in podcast mode; the tests below set this explicitly
+			mode: () => MODE
 		}
 	}
 };
@@ -193,6 +197,24 @@ function reading() {
 		['kore', 'puck', 'puck', 'kore', 'kore', 'kore', 'puck', 'kore', 'kore', 'kore']);
 	check('so the heading after it alternates against the paragraph before it',
 		reading()[6] !== reading()[3], true);
+
+	console.log('\nmodes are exclusive\n');
+
+	/*
+		Narrator and audiobook decide the voice another way. A rotation left configured from a
+		spell in podcast mode must not go on rotating underneath them — three settings that each
+		think they are in charge is what one mode value exists to prevent.
+	*/
+	await cast('paragraph', ['kore', 'puck']);
+	check('podcast rotates', Cast.enabled(), true);
+	MODE = 'narrator';
+	check('narrator does not', Cast.enabled(), false);
+	check('and imposes no voice', reading(), Array(10).fill(null));
+	MODE = 'audiobook';
+	check('audiobook does not either', Cast.enabled(), false);
+	check('leaving the tags to decide', reading(), Array(10).fill(null));
+	MODE = 'podcast';
+	check('switching back restores it without reconfiguring', Cast.enabled(), true);
 
 	console.log('\nswitched off\n');
 

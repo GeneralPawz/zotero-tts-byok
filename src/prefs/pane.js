@@ -78,6 +78,7 @@ var Zotero_BYOK_TTS = {
 		this.bindControls();
 		this.renderSpeakers();
 		this.renderCast();
+		this.renderSentiments();
 		this.buildEmotionPicker();
 		this.onProviderChange(true);
 		this.refreshLogPath();
@@ -121,6 +122,7 @@ var Zotero_BYOK_TTS = {
 		let ids = [
 			'byok-test-menu-voice', 'byok-test-menu-language', 'byok-test-menu-text',
 			'byok-test-menu-first', 'byok-test-menu-voice-default',
+			'byok-doc-sentiment-none',
 			...this.EMOTIONS.map(([groupId]) => groupId)
 		];
 		for (let id of ids) this._strings[id] = await this.msg(id);
@@ -508,6 +510,29 @@ var Zotero_BYOK_TTS = {
 		let speakers = this.readSpeakers();
 		speakers.push({ tag: '', voice: (voices[0] && voices[0].id) || '' });
 		this.writeSpeakers(speakers);
+	},
+
+	/** The document mood offered in narrator mode: the same tags that are known to work. */
+	renderSentiments() {
+		let popup = document.getElementById('byok-sentiment-popup');
+		let list = document.getElementById('byok-sentiment');
+		if (!popup || !list) return;
+		let chosen = this.getPref('sentiment') || '';
+		popup.replaceChildren();
+		let none = document.createXULElement('menuitem');
+		none.setAttribute('value', '');
+		none.setAttribute('label', this.string('byok-doc-sentiment-none'));
+		popup.append(none);
+		for (let [, tags] of this.EMOTIONS) {
+			for (let tag of tags) {
+				let item = document.createXULElement('menuitem');
+				item.setAttribute('value', tag);
+				item.setAttribute('label', tag);
+				popup.append(item);
+			}
+		}
+		// Set after the items exist, or the menulist has nothing to match the value against
+		list.value = chosen;
 	},
 
 	/* -------------------------------------------------------------- casting */

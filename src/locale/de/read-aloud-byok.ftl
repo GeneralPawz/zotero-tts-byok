@@ -230,6 +230,18 @@ byok-cast-tags-hint = Sprecher-Tags haben weiterhin Vorrang, wo ein Dokument sie
 
 byok-doc-defaults-hint = Dies sind die Standardwerte. Ein Dokument kann von jedem davon abweichen — dazu das Dokument öffnen und die Schieberegler-Schaltfläche in der Reader-Symbolleiste verwenden.
 byok-doc-heading = Dieses Dokument
+byok-doc-section-mode = Modus
+byok-doc-mode-narrator = Erzähler
+byok-doc-mode-narrator-hint = Eine Stimme durchgehend, in einer Stimmung nach Wahl.
+byok-doc-mode-podcast = Podcast
+byok-doc-mode-podcast-hint = Stimmen wechseln sich ab — für Dokumente, die nie dafür geschrieben wurden: Aufsätze, Normen, Berichte.
+byok-doc-mode-audiobook = Hörbuch
+byok-doc-mode-audiobook-hint = [Theo] [whispering] im Text wählt Stimme und Stimmung. Setzt ein Dokument mit Tags voraus.
+byok-doc-sentiment = Stimmung
+byok-doc-sentiment-none = Neutral — keine Vorgabe
+byok-doc-cast-needs-two = Eine zweite Stimme hinzufügen, sonst liest eine Stimme alles.
+byok-doc-speakers-needed = Keine Sprecher gesetzt, daher nutzt jede Zeile die Stimme für Text ohne Tag.
+
 byok-doc-reset = Globale Einstellungen verwenden
 byok-doc-none = Ein Dokument öffnen, um dessen Einstellungen zu ändern.
 byok-doc-section-reading = Lesen
@@ -245,6 +257,19 @@ byok-doc-speakers-add = Sprecher hinzufügen
 byok-doc-default-voice = Stimme für Text ohne Tag
 byok-doc-revert = Zurück zum globalen Standard
 byok-doc-note = Diese gelten nur für dieses Dokument. Neu übersprungener Text verstummt sofort; bereits aus der Lesereihenfolge entfernter Text kehrt zurück, wenn das Dokument erneut geöffnet wird.
+
+## Lesemodus
+
+byok-mode-heading = Lesemodus
+byok-mode-hint = Wie ein Dokument vertont wird. Es ist immer genau einer aktiv; die Wahl eines Modus legt die anderen beiseite, statt sie zu überlagern.
+byok-mode-narrator =
+    .label = Erzähler — eine Stimme, in einer Stimmung nach Wahl
+byok-mode-podcast =
+    .label = Podcast — Stimmen wechseln sich ab, für Dokumente, die nie dafür gedacht waren
+byok-mode-audiobook =
+    .label = Hörbuch — [Theo] [whispering] im Text wählt Stimme und Stimmung
+byok-sentiment = Stimmung
+byok-sentiment-hint = Nur im Erzähler-Modus. Hörbuch-Dokumente tragen ihre Vorgaben im Text, und der Podcast-Modus bezieht seine Abwechslung aus den Stimmen.
 
 ## Statusmeldungen
 

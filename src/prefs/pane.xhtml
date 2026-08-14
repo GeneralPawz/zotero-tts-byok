@@ -248,6 +248,27 @@
 	</groupbox>
 
 	<groupbox>
+		<label><html:h2 data-l10n-id="byok-mode-heading"/></label>
+		<description class="byok-hint" data-l10n-id="byok-mode-hint"/>
+
+		<radiogroup id="byok-mode" preference="extensions.zotero.byokTTS.mode">
+			<radio value="narrator" data-l10n-id="byok-mode-narrator"/>
+			<radio value="podcast" data-l10n-id="byok-mode-podcast"/>
+			<radio value="audiobook" data-l10n-id="byok-mode-audiobook"/>
+		</radiogroup>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-sentiment" control="byok-sentiment"/>
+			<menulist id="byok-sentiment" native="true"
+				preference="extensions.zotero.byokTTS.sentiment">
+				<menupopup id="byok-sentiment-popup"/>
+			</menulist>
+		</hbox>
+		<description class="byok-hint" data-l10n-id="byok-sentiment-hint"/>
+		<description class="byok-hint" data-l10n-id="byok-doc-defaults-hint"/>
+	</groupbox>
+
+	<groupbox>
 		<label><html:h2 data-l10n-id="byok-cast-heading"/></label>
 		<description class="byok-hint" data-l10n-id="byok-cast-hint"/>
 		<description class="byok-hint" data-l10n-id="byok-doc-defaults-hint"/>
