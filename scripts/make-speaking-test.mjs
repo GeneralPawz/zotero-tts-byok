@@ -87,18 +87,28 @@ const paragraphs = source.replace(/\r\n/g, '\n').split(/\n{2,}/).map(p => p.repl
 const blocks = [
 	{ text: 'Speaking Test', size: 19, gap: 0 },
 	{ text: 'Emotion tag coverage for Read Aloud BYOK', size: 10, gap: 6 },
-	...paragraphs.map(text => ({ text, size: BODY, gap: 10 }))
+	...paragraphs.map(text => ({ text, size: BODY, gap: 8, indent: true }))
 ];
 
 const pages = [];
 let current = [];
 let y = PAGE.h - MARGIN.top;
 
+/*
+	Zotero decides paragraph breaks from the first character's x position — a line starting more
+	than 10pt right of the one before it begins a new paragraph — and then merges any resulting
+	single-line paragraph into the previous one when the font matches. So the source text has to
+	be genuinely multi-line per paragraph, and the first line has to be indented, or the whole
+	page collapses into one Read Aloud unit.
+*/
+const INDENT = 18;
+
 for (let block of blocks) {
 	let leading = block.size * 1.45;
-	let lines = wrap(block.text, block.size, COLUMN);
+	let lines = wrap(block.text, block.size, COLUMN - (block.indent ? INDENT : 0));
 	for (let [index, line] of lines.entries()) {
 		let advance = index === 0 ? block.gap + leading : leading;
+		let x = MARGIN.x + (block.indent && index === 0 ? INDENT : 0);
 		if (y - advance < MARGIN.bottom) {
 			pages.push(current);
 			current = [];
@@ -106,7 +116,7 @@ for (let block of blocks) {
 			advance = leading;
 		}
 		y -= advance;
-		current.push({ text: line, size: block.size, x: MARGIN.x, y });
+		current.push({ text: line, size: block.size, x, y });
 	}
 }
 if (current.length) pages.push(current);

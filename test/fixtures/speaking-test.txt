@@ -1,139 +1,43 @@
-The bakery was supposed to be closed.
+The bakery was supposed to be closed. Mara had locked the door herself, turned off the ovens, and threatened the ancient cash register with replacement if it made one more mysterious beeping noise. Then something crashed in the kitchen.
 
-Mara knew this because she had personally locked the door, turned off the ovens, and threatened the ancient cash register with replacement if it made one more mysterious beeping noise.
+[Mara] [startled] “Who’s there?” She reached for the rolling pin without looking, keeping her eyes fixed on the dark doorway that led through to the ovens.
 
-Then something crashed in the kitchen.
+[Mara] [whispering] “I have a rolling pin, and I am emotionally prepared to use it.” The silence that followed was long enough for her to regret every decision that had ever led to owning a bakery.
 
-[Mara] [startled] “WHO’S THERE?”
+[Theo] [surprised] “Mara?” A head rose slowly from behind the counter, and it belonged to her next-door neighbour, who was holding a cupcake with the guilty precision of a man caught mid-crime.
 
-Silence.
+[Mara] [angry] “Theo!” She lowered the rolling pin by perhaps two inches, which under the circumstances counted as an act of considerable mercy.
 
-[Mara] [whispering] “I have a rolling pin, and I’m emotionally prepared to use it.”
+[Mara] [annoyed] “Why are you in my bakery at midnight?” She flicked the lights on and watched him squint into the sudden brightness like a startled owl.
 
-A head slowly appeared from behind the counter. It belonged to Theo, her next-door neighbor, holding a cupcake.
+[Theo] [silly] “Would you believe I am a highly trained pastry inspector?” He straightened his collar as though a uniform might materialise around him if he committed hard enough to the lie.
 
-[Theo] [surprised] “Mara?”
+[Mara] [bitter] “You are holding the evidence.” She pointed at the cupcake, which had already lost a substantial portion of its frosting to the ongoing investigation.
 
-[Mara] [angry] “THEO?!”
+[Theo] [disgusted] “Wait. Are these raisins?” He held the cupcake out at arm’s length and regarded it with the expression of a man betrayed by someone he had trusted completely.
 
-He froze.
+[Mara] [hysterical] “You stole the raisin one!” She laughed so hard she had to brace herself against the counter, and the ancient cash register beeped once in sympathy.
 
-[Mara] [annoyed] “Why are you in my bakery at midnight?”
+[Theo] [hostile] “You did that deliberately.” He set the cupcake down with the careful menace of someone who has just understood the shape of a conspiracy against him.
 
-[Theo] [silly] “Would you believe I’m a highly trained pastry inspector?”
+[Mara] [joyful] “Absolutely.” She beamed at him, entirely unrepentant, and pushed the tray of chocolate ones a little further out of his reach.
 
-[Mara] [bitter] “You’re holding the evidence.”
+[Theo] [flabbergasted] “Oh my God.” He had taken a cautious bite while she was talking, and his entire face rearranged itself around the discovery.
 
-Theo looked at the cupcake in his hand.
+[Mara] [delighted] “Good?” She leaned forward on her elbows and watched him work through it, with the satisfaction of a woman whose life’s work has just been vindicated by a burglar.
 
-[Theo] [disgusted] “Wait. Is this *raisins*?”
+[Theo] [ecstatic] “This is the best cupcake I have ever had!” He said it with his mouth still full, which she decided on balance to allow him, given the circumstances.
 
-[Mara] [hysterical] “HAHA! YOU STOLE THE RAISIN ONE!”
+[Mara] [laughing] “It is still a raisin cupcake, Theo.” She wiped a smear of flour from her cheek and succeeded only in relocating it slightly further along.
 
-[Theo] [hostile] “You did that deliberately.”
+[Theo] [thrilled] “I do not care! I have been converted!” He finished the last of it and looked genuinely bereft to discover that there was no more of it anywhere.
 
-[Mara] [joyful] “Absolutely.”
+[Theo] [longing] “You know, I have wanted an excuse to come in here after closing for months.” The sentence arrived quietly, and it changed the temperature of the room.
 
-Theo took a cautious bite.
+[Mara] [lust] “You never needed an excuse.” She stepped closer, and Theo very nearly dropped the paper wrapper he was still holding in one flour-dusted hand.
 
-His expression changed.
+[Theo] [startled] “Oh.” He said it the way people say things when the floor has shifted very slightly beneath them and nobody else appears to have noticed.
 
-[Theo] [flabbergasted] “Oh my God.”
+[Mara] [whispering] “Come back tomorrow.” She broke the last chocolate cupcake in half and held out his share, and Theo accepted it like a sacred artifact.
 
-[Mara] [delighted] “Good?”
-
-[Theo] [ecstatic] “THIS IS THE BEST CUPCAKE I’VE EVER HAD!”
-
-[Mara] [laughing] “It’s still a raisin cupcake, Theo.”
-
-[Theo] [thrilled] “I DON’T CARE! I’VE BEEN CONVERTED!”
-
-Mara leaned against the counter, watching him demolish it. For a moment, neither of them spoke.
-
-Then Theo noticed the flour on her cheek.
-
-[Theo] [longing] “You know… I’ve wanted an excuse to come in here after closing for months.”
-
-Mara's smile faded into something softer.
-
-[Mara] [lust] “You never needed an excuse.”
-
-Theo nearly dropped the cupcake wrapper.
-
-[Theo] [startled] “Oh.”
-
-[Mara] [whispering] “Oh.”
-
-Mara stepped closer.
-
-[Mara] [joyful] “You’re turning red.”
-
-[Theo] [annoyed] “I am not.”
-
-[Mara] [silly] “You look like a tomato that just received a marriage proposal.”
-
-[Theo] [laughing] “Stop.”
-
-[Mara] [delighted] “Make me.”
-
-Theo stared at her.
-
-[Theo] [surprised] “Was that flirting?”
-
-[Mara] [bitter] “No, Theo. I threaten all my burglars romantically.”
-
-[Theo] [flabbergasted] “Wait—you’ve been flirting with me this entire time?”
-
-Mara stared at him for three long seconds.
-
-[Mara] [angry] “YES!”
-
-Theo blinked.
-
-Then—
-
-[Theo] [ecstatic] “YES!”
-
-[Mara] [hysterical] “WHY ARE YOU YELLING?!”
-
-[Theo] [thrilled] “I DON’T KNOW!”
-
-They both dissolved into laughter.
-
-Eventually, Mara pulled one final cupcake from beneath the counter.
-
-Theo gasped.
-
-[Theo] [longing] “Is that chocolate?”
-
-[Mara] [hostile] “Don’t touch it.”
-
-[Theo] [whispering] “Mara…”
-
-[Mara] [disgusted] “You already ate my last raisin cupcake.”
-
-[Theo] [silly] “But sharing is caring.”
-
-She narrowed her eyes.
-
-Then broke the cupcake in half.
-
-[Mara] [joyful] “Fine.”
-
-Theo accepted his half like a sacred artifact.
-
-[Theo] [delighted] “Best burglary ever.”
-
-Mara bumped her shoulder against his.
-
-[Mara] [whispering] “Come back tomorrow.”
-
-Theo smiled.
-
-[Theo] [thrilled] “When you’re open?”
-
-Mara smiled back.
-
-[Mara] [lust] “After closing.”
-
-Theo dropped his cupcake.
+Outside, the street was empty and the ovens ticked as they cooled. Neither of them mentioned the rolling pin, which stayed on the counter between them for the rest of the night.

@@ -259,6 +259,8 @@ itself is not read out:
 [Theo] [silly] “Would you believe I’m a highly trained pastry inspector?”
 ```
 
+![Speakers](images/settings-speakers.png)
+
 Set the tags under **Speakers** in the settings, each pointing at one of your voices — a female
 voice for Mara, a male one for Theo. Narration, having no tag, stays on the voice chosen in the
 reader. Speaker and emotion tags combine; the speaker tag has to come first.
@@ -399,8 +401,10 @@ node scripts/capture.mjs read-aloud-byok --out D:/projects/zotero-tts-byok/image
 ```
 
 It reads this plugin's real `pane.xhtml`, `pane.css` and `.ftl`, so a layout change shows up in
-the documentation without anyone reopening the settings window. `?theme=dark` and `?locale=de`
-render the other variants.
+the documentation without anyone reopening the settings window. `--theme dark` and `--locale de`
+render the other variants — the German pane is how you find a string that overflows its control.
+
+Every image in this file was produced that way.
 
 ## Project layout
 

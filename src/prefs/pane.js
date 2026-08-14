@@ -76,7 +76,7 @@ var Zotero_BYOK_TTS = {
 		this.bindVoiceEditor();
 		this.bindControls();
 		this.renderSpeakerRows();
-		await this.buildEmotionPicker();
+		this.buildEmotionPicker();
 		this.onProviderChange(true);
 		this.refreshLogPath();
 
@@ -233,7 +233,10 @@ var Zotero_BYOK_TTS = {
 	 * Right-click menu on the test buttons: which voice, which language, and optionally a
 	 * phrase of your own instead of the built-in sample.
 	 */
-	async buildTestMenu(popup) {
+	buildTestMenu(popup) {
+		// Built synchronously on purpose. XUL sizes a popup when it opens, so awaiting a string
+		// here left the menu laid out before its items existed and the submenus never appeared.
+		// Labels go on through setAttributes, which Fluent fills in without us waiting.
 		popup.replaceChildren();
 		let voices = Zotero.BYOKTTS.getVoices();
 		let chosenVoice = this.getPref('test.voice') || '';
@@ -241,8 +244,10 @@ var Zotero_BYOK_TTS = {
 
 		let submenu = (id) => {
 			let menu = document.createXULElement('menu');
+			menu.id = id;
 			document.l10n.setAttributes(menu, id);
 			let child = document.createXULElement('menupopup');
+			child.id = id + '-popup';
 			menu.append(child);
 			popup.append(menu);
 			return child;
@@ -250,7 +255,9 @@ var Zotero_BYOK_TTS = {
 		let option = (label, checked, onCommand, parent) => {
 			let item = document.createXULElement('menuitem');
 			item.setAttribute('type', 'radio');
-			item.setAttribute('label', label);
+			item.setAttribute('name', parent === popup ? 'byok-test' : 'byok-test-' + parent.id);
+			if (typeof label === 'string') item.setAttribute('label', label);
+			else document.l10n.setAttributes(item, label.id);
 			if (checked) item.setAttribute('checked', 'true');
 			item.addEventListener('command', onCommand);
 			(parent || popup).append(item);
@@ -260,7 +267,7 @@ var Zotero_BYOK_TTS = {
 		// Voices and languages go into submenus — a provider list can run to ninety entries,
 		// which as one flat menu is taller than the screen
 		let voiceMenu = submenu('byok-test-menu-voice');
-		option(await this.msg('byok-test-menu-first'), !chosenVoice,
+		option({ id: 'byok-test-menu-first' }, !chosenVoice,
 			() => this.setPref('test.voice', ''), voiceMenu);
 		for (let voice of voices) {
 			option(voice.label || voice.id, chosenVoice === voice.id,
@@ -269,7 +276,7 @@ var Zotero_BYOK_TTS = {
 
 		let languageMenu = submenu('byok-test-menu-language');
 		let locales = [...new Set(voices.flatMap(v => v.locales || []))];
-		option(await this.msg('byok-test-menu-voice-default'), !chosenLocale,
+		option({ id: 'byok-test-menu-voice-default' }, !chosenLocale,
 			() => this.setPref('test.locale', ''), languageMenu);
 		for (let locale of locales) {
 			option(locale, chosenLocale === locale,
@@ -311,38 +318,30 @@ var Zotero_BYOK_TTS = {
 	 * preferences window and looks nothing like the menus beside it. XUL has no optgroup, so
 	 * disabled items stand in as group headings.
 	 */
-	async buildEmotionPicker() {
+	/**
+	 * A button with a menu rather than a dropdown list: inserting a tag is an action, not a
+	 * lasting choice, and each register gets its own flyout so the whole set is never one
+	 * column taller than the screen. Built synchronously — XUL sizes a popup as it opens, and
+	 * awaiting a string here leaves the submenus empty at that moment.
+	 */
+	buildEmotionPicker() {
 		let popup = document.getElementById('byok-emotion-popup');
-		let list = document.getElementById('byok-emotion-picker');
-		if (!popup || !list) return;
+		if (!popup) return;
 		popup.replaceChildren();
 
-		let placeholder = document.createXULElement('menuitem');
-		placeholder.setAttribute('value', '');
-		placeholder.setAttribute('label', await this.msg('byok-emotion-placeholder'));
-		popup.append(placeholder);
-
 		for (let [groupId, tags] of this.EMOTIONS) {
-			popup.append(document.createXULElement('menuseparator'));
-			let heading = document.createXULElement('menuitem');
-			heading.setAttribute('label', await this.msg(groupId));
-			heading.setAttribute('disabled', 'true');
-			heading.classList.add('byok-menu-heading');
-			popup.append(heading);
+			let menu = document.createXULElement('menu');
+			document.l10n.setAttributes(menu, groupId);
+			let child = document.createXULElement('menupopup');
 			for (let tag of tags) {
 				let item = document.createXULElement('menuitem');
-				item.setAttribute('value', `[${tag}]`);
 				item.setAttribute('label', `[${tag}]`);
-				popup.append(item);
+				item.addEventListener('command', () => this.insertStyleTag(`[${tag}]`));
+				child.append(item);
 			}
+			menu.append(child);
+			popup.append(menu);
 		}
-
-		list.selectedIndex = 0;
-		list.addEventListener('command', () => {
-			let chosen = list.value;
-			if (chosen) this.insertStyleTag(chosen);
-			list.selectedIndex = 0;
-		});
 	},
 
 	/** Drop a tag in at the cursor and let the preference binding pick the change up. */
