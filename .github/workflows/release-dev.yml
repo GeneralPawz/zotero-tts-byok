@@ -93,10 +93,13 @@ jobs:
           git fetch origin main
           git checkout -B main origin/main
           cp "${{ runner.temp }}/update-dev.json" update-dev.json
-          if git diff --quiet -- update-dev.json; then
+          # Staged before the comparison: git diff reports no change for a file that is not yet
+          # tracked, so the first ever dev release would decide it had nothing to do and push
+          # nothing — which is exactly what happened
+          git add update-dev.json
+          if git diff --cached --quiet -- update-dev.json; then
             echo 'update-dev.json already current'
             exit 0
           fi
-          git add update-dev.json
           git commit -m "Point update-dev.json at ${{ github.ref_name }} [skip ci]"
           git push origin main
