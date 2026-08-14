@@ -1,0 +1,3 @@
+# Puts a "Sponsor" button on the repository page. It only appears once the GitHub Sponsors
+# profile at github.com/sponsors/GeneralPawz has been created and approved.
+github: [GeneralPawz]
