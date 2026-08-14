@@ -46,6 +46,11 @@ jobs:
         shell: pwsh
         run: ./build.ps1
 
+      # Shipped alongside the plugin so the emotion tags and speaker voices can be heard
+      # without anyone having to build it
+      - name: Build the speaking test
+        run: node scripts/make-speaking-test.mjs
+
       - name: Generate update.json
         run: node scripts/make-update-manifest.mjs ${{ github.ref_name }} "${{ runner.temp }}/update.json"
 

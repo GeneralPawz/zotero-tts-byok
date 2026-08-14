@@ -73,16 +73,15 @@ Automatic speaker detection is not attempted. Attribution in prose is genuinely 
 consecutive lines by one character, unattributed replies — and guessing wrong is worse than not
 guessing, so the tags are explicit.
 
-There is a document for trying them. `test/fixtures/speaking-test.txt` is a short scene that uses
-every tag above at least once, and
+There is a document for trying them:
+**[speaking-test.pdf](https://github.com/GeneralPawz/zotero-tts-byok/releases/latest/download/speaking-test.pdf)**,
+attached to every release. Add it to Zotero and read it aloud to hear a voice handle the whole set
+in context, rather than one tag at a time in the prompt box.
 
-```
-node scripts/make-speaking-test.mjs
-```
-
-turns it into `target/speaking-test.pdf`. Add that to Zotero and read it aloud to hear how a voice
-handles the whole set in context, rather than one tag at a time in the prompt box. The scene is
-also tagged for two speakers, so configuring `Mara` and `Theo` demonstrates the voice switching.
+It is a two-page scene using every tag above at least once, with its dialogue tagged for two
+characters — configure speakers named `Mara` and `Theo`, plus a voice for untagged text, and you
+get a narrator and a cast. From a checkout, `node scripts/make-speaking-test.mjs` rebuilds it from
+`test/fixtures/speaking-test.txt`.
 
 Note that the tags are bracketed, and the **Text in [ ]** skip rule would otherwise strip them
 before synthesis — which is why recognised emotion and speaker tags are held back from that rule.

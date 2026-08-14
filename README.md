@@ -54,6 +54,16 @@ Zotero credits are consumed by your own voices.
 | [Testing and diagnostics](docs/diagnostics.md) | The test bar, the JSONL log, and every setting the pane exposes |
 | [Development](docs/development.md) | How the integration works, repository layout, localisation, tests, releasing, and how the screenshots are made |
 
+## Hearing what it does
+
+**[Download the speaking test](https://github.com/GeneralPawz/zotero-tts-byok/releases/latest/download/speaking-test.pdf)**
+— a two-page scene written to exercise the plugin. Add it to Zotero and read it aloud.
+
+It uses every one of the eighteen tested emotion tags at least once, and its dialogue is tagged
+for two characters, so configuring speakers named `Mara` and `Theo` plus a voice for untagged text
+gives you a narrator and a cast rather than one voice reading everything. See
+[Speaking style](docs/speaking-style.md) for how the tags work.
+
 ## How it works, briefly
 
 Zotero's reader gets its voice catalog and its audio from the parent process through two methods

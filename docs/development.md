@@ -109,7 +109,8 @@ git tag v1.7.0 && git push origin v1.7.0
 ```
 
 `.github/workflows/release.yml` takes it from there: it refuses the tag if it disagrees with the
-manifest, runs the four test suites, builds, publishes the release with the `.xpi` attached,
+manifest, runs the test suites, builds, publishes the release with the `.xpi` and the speaking
+test PDF attached,
 regenerates `update.json` with the new version, link and hash, and commits it to `main` — which
 is the moment existing installs start seeing the update.
 
