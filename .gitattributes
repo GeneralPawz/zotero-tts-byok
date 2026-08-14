@@ -1,0 +1,9 @@
+# Keep the working tree at LF on every platform.
+#
+# Git's autocrlf would otherwise hand out CRLF on Windows, and JavaScript's `.` does not match
+# \r — so every source-scanning regex anchored with $ stops matching, silently. The l10n check
+# reported all 136 strings missing before this was pinned down.
+* text=auto eol=lf
+
+*.png binary
+*.xpi binary

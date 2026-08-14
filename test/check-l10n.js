@@ -47,7 +47,9 @@ for (let source of scripts) {
 function parseFtl(file) {
 	const entries = new Map();
 	let current = null;
-	for (let line of fs.readFileSync(file, 'utf8').split('\n')) {
+	// Split on either ending: JavaScript's `.` does not match \r, so on a CRLF checkout every
+	// anchored pattern below matches nothing and the check silently passes on an empty set.
+	for (let line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
 		let head = /^([a-zA-Z][a-zA-Z0-9_-]*) =(.*)$/.exec(line);
 		if (head) {
 			current = head[1];
@@ -64,6 +66,7 @@ function parseFtl(file) {
 const parsed = new Map(locales.map(l => [l, parseFtl(path.join(localeDir, l, 'read-aloud-byok.ftl'))]));
 const reference = parsed.get('en-US');
 if (!reference) throw new Error('en-US locale is missing');
+if (!reference.size) throw new Error('en-US locale parsed to nothing — check the file encoding');
 
 console.log(`locales: ${locales.join(', ')}`);
 console.log(`ids requested by the pane: ${used.size}`);

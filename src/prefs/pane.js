@@ -187,7 +187,10 @@ var Zotero_BYOK_TTS = {
 		let popup = document.getElementById('byok-model-popup');
 		let list = document.getElementById('byok-model');
 		if (!popup || !list) return;
-		let current = list.value;
+		// Zotero fills preference-bound controls from a later timer, so at first paint the
+		// menulist is still empty; the preference is the honest answer until then. Without this
+		// the Model field renders blank even though a model is configured.
+		let current = list.value || this.getPref('model') || '';
 		popup.replaceChildren();
 		for (let model of models) {
 			let item = document.createXULElement('menuitem');

@@ -186,6 +186,8 @@ a remove button — and is the one to use if JSON is not your thing. **JSON** is
 with syntax highlighting, for pasting a whole set at once. Both write the same setting, so you can
 switch between them freely.
 
+![Voices, list view](images/settings-voices.png)
+
 ```json
 [
   { "id": "nova", "label": "Nova", "locales": ["en", "de"] },
@@ -203,7 +205,7 @@ is region-specific, as Azure's neural voices are.
 
 ## Speaking style
 
-![Speaking style and reader integration](images/settings-style.png)
+![Speaking style](images/settings-style.png)
 
 Expressive models take direction in natural language. Gemini's convention is to put it in the text
 itself — `Say cheerfully: Have a wonderful day!` — and it also honours inline tags like
@@ -346,6 +348,8 @@ that the repeated-line rule never sees two identical copies. One plain, case-ins
 line, matched anywhere in a segment.
 
 ## Diagnostic log
+
+![Logging](images/settings-logging.png)
 
 **Write a diagnostic log (JSONL)** in the preferences pane appends one JSON object per line to
 `byok-tts.jsonl` in the Zotero profile. Off by default. It records:

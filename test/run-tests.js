@@ -11,7 +11,9 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const PREFS = {};
-for (let m of fs.readFileSync(path.join(ROOT, 'src', 'prefs.js'), 'utf8')
+// Normalised first: JavaScript's `.` does not match \r, so on a CRLF checkout every anchored
+// pattern below would quietly match nothing and the defaults would come back empty.
+for (let m of fs.readFileSync(path.join(ROOT, 'src', 'prefs.js'), 'utf8').replace(/\r\n/g, '\n')
 	.matchAll(/^pref\("([^"]+)",\s*(.+)\);$/gm)) {
 	PREFS[m[1]] = JSON.parse(m[2]);
 }
