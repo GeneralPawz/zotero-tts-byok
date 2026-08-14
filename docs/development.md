@@ -176,3 +176,38 @@ the accident the split exists to prevent.
 A dev build carries the version it will be released under, so installing it over the current
 release is an upgrade and the eventual release does not try to reinstall it.
 
+## Update channels
+
+Zotero reads `update_url` from the installed manifest when the plugin is installed, and nothing
+at runtime can redirect it — `XPIInstall` sets `addon.updateURL` from the package, and the
+`extensions.update.url` preference is only consulted for add-ons that carry no update URL of
+their own. A setting inside the plugin therefore cannot choose a channel; the channel is a
+property of the build.
+
+So there are two, and each build polls its own manifest:
+
+| Channel | Manifest polled | Published by | Tag |
+| --- | --- | --- | --- |
+| stable | `main/update.json` | `release.yml`, from `main` only | `v1.16.0` |
+| dev | `main/update-dev.json` | `release-dev.yml`, from `dev` | `dev-v1.16.0.1` |
+
+```powershell
+.uild.ps1              # stable
+.uild.ps1 -Channel dev # dev
+```
+
+The dev build has its `update_url` rewritten on the way into the archive, so `src/manifest.json`
+is never left pointing somewhere unexpected, and the workflow reads the packaged manifest back
+out to confirm the channel before publishing.
+
+Both manifests live on `main`. A per-branch `update.json` would work equally well for Zotero and
+would conflict on every merge from `dev`, which it did twice before this arrangement.
+
+**Switching channels means installing the other build once.** After that, updates follow that
+channel by themselves. The About section of the preferences pane reports which channel an install
+is on, read from the packaged manifest rather than a preference — a preference claiming a channel
+the manifest disagrees with would simply be wrong.
+
+Dev versions carry a fourth component (`1.16.0.1`), so they sort above the stable release they
+lead up to and a dev install is never quietly pulled backwards.
+

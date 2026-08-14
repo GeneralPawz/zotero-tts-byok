@@ -162,6 +162,15 @@ byok-copied = Copied
 byok-about-heading = About
 byok-about-license = Read Aloud BYOK — MIT licensed. github.com/GeneralPawz/zotero-tts-byok
 byok-version-line = Plugin { $plugin } · Zotero { $zotero }
+byok-channel-line = Update channel: { $channel }
+byok-channel-switch =
+    .label = Switch channel
+byok-channel-to-dev =
+    .label = Switch to dev builds
+byok-channel-to-stable =
+    .label = Switch to stable builds
+byok-channel-switching = Opening the { $channel } download. Install it once — Zotero takes the update address from the installed plugin, so from then on updates follow that channel by themselves.
+
 
 byok-jump-output =
     .label = Output ⤓

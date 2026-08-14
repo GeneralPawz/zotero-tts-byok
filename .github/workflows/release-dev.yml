@@ -1,0 +1,102 @@
+name: Release (dev channel)
+
+# Dev builds, for trying something before it reaches stable.
+#
+#   git tag dev-v1.16.0.1 && git push origin dev-v1.16.0.1
+#
+# These are published as prereleases and advertised through update-dev.json, which only a
+# plugin built with `./build.ps1 -Channel dev` polls. Stable installs never see them: Zotero
+# reads update_url from the installed manifest, so the two channels cannot cross.
+
+on:
+  push:
+    tags: ['dev-v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check the tag against the manifest
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}' -replace '^dev-v', ''
+          $version = (Get-Content src/manifest.json -Raw | ConvertFrom-Json).version
+          if ($tag -ne $version) {
+            throw "tag $tag does not match manifest version $version"
+          }
+          Write-Output "tag and manifest agree on $version"
+
+      - name: Tests
+        run: |
+          node test/check-syntax.js
+          node test/run-tests.js
+          node test/check-cast.js
+          node test/check-docprefs.js
+          node test/check-l10n.js
+          node test/check-highlight.js
+          node test/check-pane.js
+          node test/check-docs.js
+          node test/check-workflows.js
+
+      - name: Build for the dev channel
+        shell: pwsh
+        run: ./build.ps1 -Channel dev
+
+      # The packaged manifest must poll the dev manifest, or a dev install would quietly be
+      # pulled back to stable at the next update check
+      - name: Verify the packaged channel
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead('target/read-aloud-byok.xpi')
+          try {
+            $entry = $zip.GetEntry('manifest.json')
+            $reader = New-Object System.IO.StreamReader($entry.Open())
+            $url = ($reader.ReadToEnd() | ConvertFrom-Json).applications.zotero.update_url
+          }
+          finally { $zip.Dispose() }
+          if ($url -notlike '*update-dev.json') { throw "packaged update_url is $url" }
+          Write-Output "packaged channel is dev"
+
+      - name: Generate update-dev.json
+        run: node scripts/make-update-manifest.mjs ${{ github.ref_name }} "${{ runner.temp }}/update-dev.json"
+
+      - name: Publish the prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            target/read-aloud-byok.xpi \
+            --title "${{ github.ref_name }} (dev)" \
+            --prerelease \
+            --notes "Dev channel build. Installs alongside nothing — it replaces your current plugin and thereafter updates from the dev channel. Install a stable build once to go back."
+
+      # Kept on main so it is always reachable, and so merging dev into main never conflicts
+      # over it the way a per-branch update.json would
+      - name: Point update-dev.json at the new prerelease
+        shell: bash
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git checkout -B main origin/main
+          cp "${{ runner.temp }}/update-dev.json" update-dev.json
+          if git diff --quiet -- update-dev.json; then
+            echo 'update-dev.json already current'
+            exit 0
+          fi
+          git add update-dev.json
+          git commit -m "Point update-dev.json at ${{ github.ref_name }} [skip ci]"
+          git push origin main

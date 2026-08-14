@@ -82,6 +82,7 @@ var Zotero_BYOK_TTS = {
 		this.buildEmotionPicker();
 		this.onProviderChange(true);
 		this.refreshLogPath();
+		this.refreshChannel();
 
 		// Translate the nodes we built ourselves, plus anything inserted before the FTL landed
 		try {
@@ -1023,6 +1024,36 @@ var Zotero_BYOK_TTS = {
 	showLastError() {
 		let last = Zotero.BYOKTTS.lastError;
 		if (last) this.status(last, true); else this.statusL10n('byok-msg-no-errors');
+	},
+
+	/* ----------------------------------------------------------- channel */
+
+	async refreshChannel() {
+		let elem = document.getElementById('byok-channel');
+		let button = document.getElementById('byok-switch-channel');
+		if (!elem) return;
+		let { channel } = await Zotero.BYOKTTS.updateChannel();
+		this._channel = channel;
+		document.l10n.setAttributes(elem, 'byok-channel-line', { channel });
+		if (button) {
+			document.l10n.setAttributes(button,
+				channel === 'dev' ? 'byok-channel-to-stable' : 'byok-channel-to-dev');
+		}
+	},
+
+	/**
+	 * Switching channels means installing the other build once — the update URL is fixed in the
+	 * installed manifest, so there is nothing here to toggle. This opens the right download and
+	 * says so, rather than offering a switch that could not work.
+	 */
+	async switchChannel() {
+		let target = this._channel === 'dev' ? 'stable' : 'dev';
+		const REPO = 'https://github.com/GeneralPawz/zotero-tts-byok/releases';
+		let url = target === 'dev'
+			? REPO
+			: REPO + '/latest/download/read-aloud-byok.xpi';
+		Zotero.launchURL(url);
+		this.statusL10n('byok-channel-switching', { channel: target });
 	},
 
 	/* ------------------------------------------------------------ logging */

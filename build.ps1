@@ -6,7 +6,12 @@
 
 param(
 	[string] $Source = (Join-Path $PSScriptRoot 'src'),
-	[string] $TargetDir = (Join-Path $PSScriptRoot 'target')
+	[string] $TargetDir = (Join-Path $PSScriptRoot 'target'),
+	# Which update manifest the packaged plugin polls. Zotero reads update_url from the
+	# installed manifest and nothing at runtime can redirect it, so the channel is baked in
+	# at build time — switching channels means installing the other build once.
+	[ValidateSet('stable', 'dev')]
+	[string] $Channel = 'stable'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,6 +31,22 @@ if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $by
 $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
 $version = $manifest.version
 
+# The source manifest always names the stable channel; a dev build has its update_url
+# rewritten on the way into the archive, so src/manifest.json is never left pointing
+# somewhere unexpected.
+$manifestEntry = $manifestPath
+$tempManifest = $null
+if ($Channel -eq 'dev') {
+	$raw = Get-Content $manifestPath -Raw
+	$devUrl = 'https://raw.githubusercontent.com/GeneralPawz/zotero-tts-byok/main/update-dev.json'
+	$pattern = '"update_url":' + [char]92 + 's*"[^"]*"'
+	$patched = $raw -replace $pattern, ('"update_url": "' + $devUrl + '"')
+	if ($patched -eq $raw) { throw 'could not rewrite update_url for the dev channel' }
+	$tempManifest = Join-Path ([System.IO.Path]::GetTempPath()) 'byok-manifest.json'
+	[System.IO.File]::WriteAllText($tempManifest, $patched, (New-Object System.Text.UTF8Encoding $false))
+	$manifestEntry = $tempManifest
+}
+
 New-Item -ItemType Directory -Force $TargetDir | Out-Null
 $outFile = Join-Path $TargetDir 'read-aloud-byok.xpi'
 if (Test-Path $outFile) { Remove-Item $outFile -Force }
@@ -44,8 +65,10 @@ try {
 	}
 	foreach ($file in $files) {
 		$name = $file.FullName.Substring($root.Length + 1).Replace('\', '/')
+		$source = $file.FullName
+		if ($name -eq 'manifest.json') { $source = $manifestEntry }
 		[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
-			$zip, $file.FullName, $name, [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
+			$zip, $source, $name, [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
 	}
 }
 finally {
@@ -63,4 +86,5 @@ if ($bad.Count) { throw "ZIP contains backslash separators: $($bad -join ', ')" 
 if ($names -notcontains 'manifest.json') { throw 'manifest.json is missing from the archive root' }
 
 $size = [math]::Round((Get-Item $outFile).Length / 1KB, 1)
-Write-Output "built $outFile  (v$version, $count entries, $size KB)"
+if ($tempManifest -and (Test-Path $tempManifest)) { Remove-Item $tempManifest -Force }
+Write-Output "built $outFile  (v$version, $Channel channel, $count entries, $size KB)"

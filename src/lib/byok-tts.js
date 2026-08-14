@@ -87,6 +87,26 @@ Zotero.BYOKTTS = new function () {
 		return this.MODES.includes(mode) ? mode : 'podcast';
 	};
 
+	/**
+	 * Which update channel this install follows, read from the packaged manifest rather than a
+	 * preference: Zotero takes update_url from there at install time and nothing at runtime can
+	 * redirect it, so a preference claiming otherwise would simply be wrong.
+	 *
+	 * @return {Promise<{channel: String, url: String|null}>}
+	 */
+	this.updateChannel = async function () {
+		try {
+			let response = await fetch(this.rootURI + 'manifest.json');
+			let manifest = await response.json();
+			let url = manifest?.applications?.zotero?.update_url || null;
+			return { channel: /update-dev\.json$/.test(url || '') ? 'dev' : 'stable', url };
+		}
+		catch (e) {
+			Zotero.debug('BYOK TTS: could not read the update channel — ' + (e.message || e));
+			return { channel: 'stable', url: null };
+		}
+	};
+
 	this.isEnabled = function () {
 		return !!this.getPref('enabled') && this.getVoices().length > 0;
 	};
