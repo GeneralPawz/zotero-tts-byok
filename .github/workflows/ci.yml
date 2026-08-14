@@ -21,6 +21,7 @@ jobs:
           node test/check-l10n.js
           node test/check-highlight.js
           node test/check-pane.js
+          node test/check-docs.js
 
       # Also proves the package is well formed: build.ps1 fails on a backslash in a
       # ZIP entry name or a missing root manifest.json, both of which make Zotero
