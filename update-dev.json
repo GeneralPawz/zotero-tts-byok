@@ -1,0 +1,20 @@
+{
+	"addons": {
+		"byok-tts@local": {
+			"updates": [
+				{
+					"version": "1.16.0.1",
+					"update_link": "https://github.com/GeneralPawz/zotero-tts-byok/releases/download/dev-v1.16.0.1/read-aloud-byok.xpi",
+					"update_hash": "sha256:f416b00c0de3186fdc2c9c62278c7a061bc4e9b5064d5afbf51a9b815661a499",
+					"update_info_url": "https://github.com/GeneralPawz/zotero-tts-byok/releases/tag/dev-v1.16.0.1",
+					"applications": {
+						"zotero": {
+							"strict_min_version": "7.999",
+							"strict_max_version": "10.999.999"
+						}
+					}
+				}
+			]
+		}
+	}
+}
