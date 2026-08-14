@@ -19,6 +19,7 @@ jobs:
         run: |
           node test/run-tests.js
           node test/check-cast.js
+          node test/check-docprefs.js
           node test/check-l10n.js
           node test/check-highlight.js
           node test/check-pane.js

@@ -113,7 +113,8 @@ Zotero.BYOKTTS.Skip = new function () {
 	const DEFAULTS = { smoothOrder: true };
 
 	this.isOn = function (key) {
-		let value = Zotero.Prefs.get(PREF + key, true);
+		let value = Zotero.BYOKTTS.DocPrefs?.resolve('skip.' + key);
+		if (value === undefined) value = Zotero.Prefs.get(PREF + key, true);
 		if (value === undefined || value === null) return !!DEFAULTS[key];
 		return !!value;
 	};
@@ -432,7 +433,8 @@ Zotero.BYOKTTS.Skip = new function () {
 
 	/** User-supplied literals, one per line — the escape hatch for odd watermarks. */
 	this.customPatterns = function () {
-		let raw = Zotero.Prefs.get(PREF + 'custom', true);
+		let raw = Zotero.BYOKTTS.DocPrefs?.resolve('skip.custom');
+		if (raw === undefined) raw = Zotero.Prefs.get(PREF + 'custom', true);
 		if (!raw) return [];
 		return String(raw).split(/\r?\n/).map(line => line.trim().toLowerCase()).filter(Boolean);
 	};

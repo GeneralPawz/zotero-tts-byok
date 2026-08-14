@@ -226,6 +226,26 @@ byok-cast-empty = No voices in the rotation.
 byok-cast-needs-two = Add a second voice — one voice cannot alternate with itself.
 byok-cast-tags-hint = Speaker tags still win where a document has them, and skipped passages do not use up a turn. The order below is the order the voices take.
 
+## Reader panel
+
+byok-doc-defaults-hint = These are the defaults. A document can disagree with any of them — open it and use the sliders button in the reader toolbar.
+byok-doc-heading = This document
+byok-doc-reset = Use global settings
+byok-doc-none = Open a document to change its settings.
+byok-doc-section-reading = Reading
+byok-doc-section-skip = Skip
+byok-doc-section-cast = Alternating voices
+byok-doc-section-speakers = Speakers
+byok-doc-granularity = Read by
+byok-doc-smooth = Prune skipped text from the reading order
+byok-doc-custom = Also skip lines containing (one per line)
+byok-doc-cast-mode = Change voice every
+byok-doc-cast-add = Add voice to rotation
+byok-doc-speakers-add = Add speaker
+byok-doc-default-voice = Voice for untagged text
+byok-doc-revert = Back to the global default
+byok-doc-note = These apply to this document only. Newly skipped text goes silent at once; text already pruned from the reading order comes back when the document is reopened.
+
 ## Status messages
 
 byok-msg-loading-voices = Loading voices…

@@ -3,10 +3,10 @@
 		"byok-tts@local": {
 			"updates": [
 				{
-					"version": "1.13.0",
-					"update_link": "https://github.com/GeneralPawz/zotero-tts-byok/releases/download/v1.13.0/read-aloud-byok.xpi",
-					"update_hash": "sha256:0428d95804fb5f05aefed024d234221499c852c26d4ce3f16287bd982515af70",
-					"update_info_url": "https://github.com/GeneralPawz/zotero-tts-byok/releases/tag/v1.13.0",
+					"version": "1.14.0",
+					"update_link": "https://github.com/GeneralPawz/zotero-tts-byok/releases/download/v1.14.0/read-aloud-byok.xpi",
+					"update_hash": "sha256:8cbf31471dfc13892435d90217fe2a9202d3f1cb4fba2a4acd0d063fc480e25f",
+					"update_info_url": "https://github.com/GeneralPawz/zotero-tts-byok/releases/tag/v1.14.0",
 					"applications": {
 						"zotero": {
 							"strict_min_version": "7.999",

@@ -11,13 +11,17 @@ Bring your own text-to-speech key to Zotero 9's built-in Read Aloud, instead of 
 metered Standard/Premium minutes or falling back to the local SAPI voices.
 
 Works with OpenAI-compatible endpoints (including OpenRouter and self-hosted servers), ElevenLabs,
-Speechify, Azure Speech, Google Gemini TTS, or any custom endpoint. Adds a **Skip** panel to the
-reader for leaving out titles, running heads, footnotes, tables, formulas, citations, URLs and
-bracketed asides — and stitches sentences broken across a page break back together.
+Speechify, Azure Speech, Google Gemini TTS, or any custom endpoint. Adds a **sliders button** to
+the reader toolbar for leaving out titles, running heads, footnotes, tables, formulas, citations,
+URLs and bracketed asides — and stitches sentences broken across a page break back together.
 
 Documents that carry no speaker tags — a standard, a paper, anything you did not write — can still
 be [read by two or more voices in turn](docs/speaking-style.md#alternating-voices), changing at
 each sentence, paragraph, page or section.
+
+All of that is a global default that any single document can [disagree with](docs/per-document.md)
+— a standard gets its running heads dropped and a voice per clause without a novel inheriting
+either.
 
 ![Provider settings, with the test bar reporting a successful run](media/settings-provider.png)
 
@@ -63,6 +67,7 @@ Everything else — the provider, the key, the model — is yours to choose.
 | Page | What is in it |
 | --- | --- |
 | [Providers](docs/providers.md) | OpenAI-compatible endpoints, OpenRouter, ElevenLabs, Speechify, Azure, Gemini and custom endpoints; choosing a model; describing your voices |
+| [Per-document settings](docs/per-document.md) | The sliders button in the reader toolbar: giving one document its own skip rules, voices and speakers without disturbing the rest |
 | [Speaking style](docs/speaking-style.md) | Style prompts, the tested inline emotion tags, giving each character its own voice, and alternating voices through a document that has no tags at all |
 | [Skip rules](docs/skip.md) | Leaving out titles, running heads, footnotes, tables, formulas, citations, URLs and bracketed asides |
 | [Testing and diagnostics](docs/diagnostics.md) | The test bar, the JSONL log, and every setting the pane exposes |

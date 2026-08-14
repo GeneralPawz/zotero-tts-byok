@@ -61,7 +61,13 @@ Zotero.BYOKTTS = new function () {
 
 	/* ------------------------------------------------------------------ prefs */
 
+	/**
+	 * A document may disagree with the global default for the handful of settings that describe
+	 * how it should be read; everything else resolves globally as before.
+	 */
 	this.getPref = function (key) {
+		let scoped = this.DocPrefs?.resolve(key);
+		if (scoped !== undefined) return scoped;
 		return Zotero.Prefs.get(PREF + key, true);
 	};
 

@@ -38,13 +38,15 @@ Zotero.BYOKTTS.Cast = new function () {
 	let _building = null;
 
 	this.mode = function () {
-		let mode = Zotero.Prefs.get(PREF + 'mode', true);
+		let mode = Zotero.BYOKTTS.DocPrefs?.resolve('cast.mode');
+		if (mode === undefined) mode = Zotero.Prefs.get(PREF + 'mode', true);
 		return this.MODES.includes(mode) ? mode : 'off';
 	};
 
 	/** @return {String[]} ids of the voices to rotate, in order */
 	this.voices = function () {
-		let raw = Zotero.Prefs.get(PREF + 'voices', true);
+		let raw = Zotero.BYOKTTS.DocPrefs?.resolve('cast.voices');
+		if (raw === undefined) raw = Zotero.Prefs.get(PREF + 'voices', true);
 		if (!raw) return [];
 		try {
 			let parsed = JSON.parse(raw);

@@ -9,6 +9,7 @@ function uninstall() {}
 async function startup({ id, version, rootURI }) {
 	Services.scriptloader.loadSubScript(rootURI + 'lib/byok-tts.js');
 	// These attach to Zotero.BYOKTTS, so they load after it
+	Services.scriptloader.loadSubScript(rootURI + 'lib/docprefs.js');
 	Services.scriptloader.loadSubScript(rootURI + 'lib/skip.js');
 	Services.scriptloader.loadSubScript(rootURI + 'lib/cast.js');
 	Services.scriptloader.loadSubScript(rootURI + 'lib/log.js');

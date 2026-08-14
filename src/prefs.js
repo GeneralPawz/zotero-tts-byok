@@ -58,3 +58,7 @@ pref("extensions.zotero.byokTTS.speakers.default", "");
 // page or section. Needs at least two voices in the rotation to do anything.
 pref("extensions.zotero.byokTTS.cast.mode", "off");
 pref("extensions.zotero.byokTTS.cast.voices", "[]");
+
+// Per-document overrides, keyed "libraryID/itemKey". Sparse: only settings a document actually
+// disagrees with the global default about are stored here.
+pref("extensions.zotero.byokTTS.perDocument", "{}");

@@ -226,6 +226,26 @@ byok-cast-empty = Keine Stimmen in der Abfolge.
 byok-cast-needs-two = Eine zweite Stimme hinzufügen — eine Stimme allein kann sich nicht abwechseln.
 byok-cast-tags-hint = Sprecher-Tags haben weiterhin Vorrang, wo ein Dokument sie enthält, und übersprungene Passagen verbrauchen keinen Zug. Die Reihenfolge unten ist die Reihenfolge der Stimmen.
 
+## Reader-Panel
+
+byok-doc-defaults-hint = Dies sind die Standardwerte. Ein Dokument kann von jedem davon abweichen — dazu das Dokument öffnen und die Schieberegler-Schaltfläche in der Reader-Symbolleiste verwenden.
+byok-doc-heading = Dieses Dokument
+byok-doc-reset = Globale Einstellungen verwenden
+byok-doc-none = Ein Dokument öffnen, um dessen Einstellungen zu ändern.
+byok-doc-section-reading = Lesen
+byok-doc-section-skip = Überspringen
+byok-doc-section-cast = Wechselnde Stimmen
+byok-doc-section-speakers = Sprecher
+byok-doc-granularity = Vorlesen nach
+byok-doc-smooth = Übersprungenen Text aus der Lesereihenfolge entfernen
+byok-doc-custom = Außerdem Zeilen überspringen, die Folgendes enthalten (eine pro Zeile)
+byok-doc-cast-mode = Stimme wechseln bei jedem/jeder
+byok-doc-cast-add = Stimme zur Abfolge hinzufügen
+byok-doc-speakers-add = Sprecher hinzufügen
+byok-doc-default-voice = Stimme für Text ohne Tag
+byok-doc-revert = Zurück zum globalen Standard
+byok-doc-note = Diese gelten nur für dieses Dokument. Neu übersprungener Text verstummt sofort; bereits aus der Lesereihenfolge entfernter Text kehrt zurück, wenn das Dokument erneut geöffnet wird.
+
 ## Statusmeldungen
 
 byok-msg-loading-voices = Stimmen werden geladen …
