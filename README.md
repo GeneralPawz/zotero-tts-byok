@@ -10,7 +10,7 @@ bracketed asides — and stitches sentences broken across a page break back toge
 
 Requires Zotero 9. MIT licensed.
 
-![Provider settings](images/settings-provider.png)
+![Provider settings, with the test bar reporting a successful run](images/settings-provider.png)
 
 ## How it works
 
@@ -269,7 +269,7 @@ the cached audio after editing it.
 
 ## Skip
 
-![Skip rules and the test bar](images/settings-skip.png)
+![Skip rules](images/settings-skip.png)
 
 A **Skip** row is added to the reader's Read Aloud popup; clicking it reveals toggles for what to
 leave out. The same toggles are mirrored in this plugin's preferences pane.
