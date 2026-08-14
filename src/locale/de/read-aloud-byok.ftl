@@ -201,6 +201,10 @@ byok-speakers-add =
     .label = Sprecher hinzufügen
 byok-speakers-empty = Keine Sprecher eingerichtet.
 
+byok-speakers-default = Stimme für Text ohne Tag
+byok-speakers-default-hint = Erzähltext, Überschriften, alles ohne Tag. Nicht gesetzt lassen, um die im Reader gewählte Stimme zu behalten.
+byok-speakers-default-none = Im Reader gewählte Stimme
+
 ## Statusmeldungen
 
 byok-msg-loading-voices = Stimmen werden geladen …

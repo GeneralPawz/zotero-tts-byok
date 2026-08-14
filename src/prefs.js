@@ -50,3 +50,6 @@ pref("extensions.zotero.byokTTS.test.text", "");
 
 // Per-character voices: [{ "tag": "Mara", "voice": "Kore" }]
 pref("extensions.zotero.byokTTS.speakers", "[]");
+
+// Voice for anything no speaker tag claims — narration and headings
+pref("extensions.zotero.byokTTS.speakers.default", "");

@@ -73,9 +73,10 @@ var Zotero_BYOK_TTS = {
 			});
 		}
 
+		await this.cacheMenuStrings();
 		this.bindVoiceEditor();
 		this.bindControls();
-		this.renderSpeakerRows();
+		this.renderSpeakers();
 		this.buildEmotionPicker();
 		this.onProviderChange(true);
 		this.refreshLogPath();
@@ -109,6 +110,25 @@ var Zotero_BYOK_TTS = {
 		}
 	},
 
+	/**
+	 * Menus are built at the moment they open, and a label set through Fluent then is not
+	 * resolved in time — the entry renders blank, which looks exactly like a missing submenu.
+	 * Resolving the handful of strings once, up front, avoids the whole problem.
+	 */
+	async cacheMenuStrings() {
+		this._strings = {};
+		let ids = [
+			'byok-test-menu-voice', 'byok-test-menu-language', 'byok-test-menu-text',
+			'byok-test-menu-first', 'byok-test-menu-voice-default',
+			...this.EMOTIONS.map(([groupId]) => groupId)
+		];
+		for (let id of ids) this._strings[id] = await this.msg(id);
+	},
+
+	string(id) {
+		return (this._strings && this._strings[id]) || id;
+	},
+
 	async statusL10n(id, args, isError) {
 		this.status(await this.msg(id, args), isError);
 	},
@@ -138,6 +158,20 @@ var Zotero_BYOK_TTS = {
 		let firstLine = String(message || '').split('\n')[0];
 		summary.textContent = firstLine.length > 110 ? firstLine.slice(0, 110) + '…' : firstLine;
 		summary.classList.toggle('byok-error', state === 'error');
+	},
+
+	/** Show the bar's separating line only once content has scrolled beneath it. */
+	bindStickyLine() {
+		let bar = document.getElementById('byok-sticky');
+		if (!bar) return;
+		let scroller = bar.parentElement;
+		while (scroller && scroller.scrollHeight <= scroller.clientHeight + 1) {
+			scroller = scroller.parentElement;
+		}
+		if (!scroller) return;
+		let update = () => bar.classList.toggle('byok-stuck', scroller.scrollTop > 2);
+		scroller.addEventListener('scroll', update, { passive: true });
+		update();
 	},
 
 	/** Scroll to the test controls and leave focus there. */
@@ -245,7 +279,7 @@ var Zotero_BYOK_TTS = {
 		let submenu = (id) => {
 			let menu = document.createXULElement('menu');
 			menu.id = id;
-			document.l10n.setAttributes(menu, id);
+			menu.setAttribute('label', this.string(id));
 			let child = document.createXULElement('menupopup');
 			child.id = id + '-popup';
 			menu.append(child);
@@ -256,8 +290,7 @@ var Zotero_BYOK_TTS = {
 			let item = document.createXULElement('menuitem');
 			item.setAttribute('type', 'radio');
 			item.setAttribute('name', parent === popup ? 'byok-test' : 'byok-test-' + parent.id);
-			if (typeof label === 'string') item.setAttribute('label', label);
-			else document.l10n.setAttributes(item, label.id);
+			item.setAttribute('label', typeof label === 'string' ? label : this.string(label.id));
 			if (checked) item.setAttribute('checked', 'true');
 			item.addEventListener('command', onCommand);
 			(parent || popup).append(item);
@@ -285,7 +318,7 @@ var Zotero_BYOK_TTS = {
 
 		popup.append(document.createXULElement('menuseparator'));
 		let custom = document.createXULElement('menuitem');
-		document.l10n.setAttributes(custom, 'byok-test-menu-text');
+		custom.setAttribute('label', this.string('byok-test-menu-text'));
 		custom.addEventListener('command', () => this.promptTestText());
 		popup.append(custom);
 	},
@@ -331,7 +364,7 @@ var Zotero_BYOK_TTS = {
 
 		for (let [groupId, tags] of this.EMOTIONS) {
 			let menu = document.createXULElement('menu');
-			document.l10n.setAttributes(menu, groupId);
+			menu.setAttribute('label', this.string(groupId));
 			let child = document.createXULElement('menupopup');
 			for (let tag of tags) {
 				let item = document.createXULElement('menuitem');
@@ -379,6 +412,11 @@ var Zotero_BYOK_TTS = {
 	writeSpeakers(speakers) {
 		this.setPref('speakers', JSON.stringify(speakers));
 		this.renderSpeakerRows();
+	},
+
+	renderSpeakers() {
+		this.renderSpeakerRows();
+		this.renderDefaultSpeaker();
 	},
 
 	renderSpeakerRows() {
@@ -439,6 +477,31 @@ var Zotero_BYOK_TTS = {
 		});
 	},
 
+	/** The voice used for anything no speaker tag claims. */
+	renderDefaultSpeaker() {
+		let list = document.getElementById('byok-speakers-default');
+		let popup = document.getElementById('byok-speakers-default-popup');
+		if (!list || !popup) return;
+		let chosen = this.getPref('speakers.default') || '';
+		popup.replaceChildren();
+
+		let none = document.createXULElement('menuitem');
+		none.setAttribute('value', '');
+		none.setAttribute('label', this.string('byok-speakers-default-none'));
+		popup.append(none);
+		for (let voice of Zotero.BYOKTTS.getVoices()) {
+			let item = document.createXULElement('menuitem');
+			item.setAttribute('value', voice.id);
+			item.setAttribute('label', voice.label || voice.id);
+			popup.append(item);
+		}
+		list.value = chosen;
+		if (!list._byokBound) {
+			list._byokBound = true;
+			list.addEventListener('command', () => this.setPref('speakers.default', list.value));
+		}
+	},
+
 	addSpeaker() {
 		let voices = Zotero.BYOKTTS.getVoices();
 		let speakers = this.readSpeakers();
@@ -463,7 +526,7 @@ var Zotero_BYOK_TTS = {
 		this.renderVoiceRows();
 		this.renderHighlight();
 		// The speaker rows pick their voice from this list
-		this.renderSpeakerRows();
+		this.renderSpeakers();
 	},
 
 	/**
@@ -488,6 +551,13 @@ var Zotero_BYOK_TTS = {
 		// was never restored. Re-read once the real value lands.
 		let view = document.getElementById('byok-voices-view');
 		if (view) view.addEventListener('syncfrompreference', () => this.updateVoicesView());
+
+		// preferences.js converts oncommand attributes on a parsed fragment and nothing else,
+		// so onpopupshowing in the markup never becomes a listener
+		let testMenu = document.getElementById('byok-test-menu');
+		if (testMenu) testMenu.addEventListener('popupshowing', () => this.buildTestMenu(testMenu));
+
+		this.bindStickyLine();
 	},
 
 	bindVoiceEditor() {

@@ -262,8 +262,13 @@ itself is not read out:
 ![Speakers](images/settings-speakers.png)
 
 Set the tags under **Speakers** in the settings, each pointing at one of your voices — a female
-voice for Mara, a male one for Theo. Narration, having no tag, stays on the voice chosen in the
-reader. Speaker and emotion tags combine; the speaker tag has to come first.
+voice for Mara, a male one for Theo. **Voice for untagged text** in the same section covers
+everything no tag claims: narration, headings, ordinary prose. Leave it unset and that text keeps
+the voice chosen in the reader; set it and a story reads as a narrator plus its characters.
+
+Speaker and emotion tags combine, and the speaker tag has to come first. With sentence chunks the
+split falls where you would want it — `[Mara] [angry] “Theo!”` is Mara, and the narration sentence
+after it is the narrator.
 
 Automatic speaker detection is not attempted. Attribution in prose is genuinely ambiguous —
 consecutive lines by one character, unattributed replies — and guessing wrong is worse than not

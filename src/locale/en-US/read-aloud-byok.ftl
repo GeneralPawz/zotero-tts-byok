@@ -201,6 +201,10 @@ byok-speakers-add =
     .label = Add speaker
 byok-speakers-empty = No speakers configured.
 
+byok-speakers-default = Voice for untagged text
+byok-speakers-default-hint = Narration, headings, anything no tag claims. Leave unset to keep the voice chosen in the reader.
+byok-speakers-default-none = Reader’s chosen voice
+
 ## Status messages
 
 byok-msg-loading-voices = Loading voices…

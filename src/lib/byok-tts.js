@@ -337,15 +337,27 @@ Zotero.BYOKTTS = new function () {
 	 */
 	this.matchSpeaker = function (text) {
 		let speakers = this.getSpeakers();
-		if (!speakers.length) return null;
+		let voices = this.getVoices();
 		let match = /^\s*\[([^\]]+)\]\s*/.exec(text);
-		if (!match) return null;
-		let name = match[1].trim().toLowerCase();
-		let speaker = speakers.find(s => String(s.tag).toLowerCase() === name);
-		if (!speaker) return null;
-		let voice = this.getVoices().find(v => v.id === speaker.voice);
-		if (!voice) return null;
-		return { voice, text: text.slice(match[0].length) };
+
+		if (match && speakers.length) {
+			let name = match[1].trim().toLowerCase();
+			let speaker = speakers.find(s => String(s.tag).toLowerCase() === name);
+			if (speaker) {
+				let voice = voices.find(v => v.id === speaker.voice);
+				if (voice) return { voice, text: text.slice(match[0].length) };
+			}
+		}
+
+		// Everything not claimed by a speaker — narration, headings — can have a voice of its
+		// own, so a story reads as a narrator plus its characters rather than one voice doing
+		// all of it.
+		let fallback = this.getPref('speakers.default');
+		if (fallback) {
+			let voice = voices.find(v => v.id === fallback);
+			if (voice) return { voice, text };
+		}
+		return null;
 	};
 
 	/** OpenRouter is offered separately for convenience but speaks the OpenAI dialect. */

@@ -252,3 +252,13 @@
 	font-weight: 600;
 	opacity: .7;
 }
+
+/* The bar's separating line appears only once content has scrolled beneath it */
+#byok-sticky {
+	border-bottom: 1px solid transparent;
+}
+
+#byok-sticky.byok-stuck {
+	border-bottom-color: var(--fill-quarternary, rgba(128, 128, 128, .3));
+	box-shadow: 0 4px 8px -6px rgba(0, 0, 0, .35);
+}
