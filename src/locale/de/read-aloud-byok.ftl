@@ -246,6 +246,9 @@ byok-msg-cache-failed = Cache konnte nicht geleert werden: { $detail }
 byok-msg-no-errors = Seit dem Start von Zotero wurden keine Wiedergabefehler aufgezeichnet.
 byok-msg-log-empty = Das Protokoll ist leer.
 byok-msg-log-none-yet = Noch kein Protokoll — Protokollierung einschalten, PDF erneut öffnen und kurz abspielen.
+byok-msg-log-opening = Protokollordner wird geöffnet …
+byok-msg-log-opened = { $path } geöffnet
+byok-msg-log-off = Die Protokollierung ist ausgeschaltet, daher gibt es nichts anzuzeigen. Oben einschalten, das PDF erneut öffnen und ein wenig abspielen.
 byok-msg-log-cleared = Protokoll geleert. Öffnen Sie das PDF erneut, um einen frischen Durchlauf aufzuzeichnen.
 byok-msg-log-tail = { $path }
     { $entries } Einträge, letzte 40:

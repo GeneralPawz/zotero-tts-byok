@@ -1008,22 +1008,36 @@ var Zotero_BYOK_TTS = {
 		document.l10n.setAttributes(elem, 'byok-log-path', { path: Zotero.BYOKTTS.Log.path });
 	},
 
+	/**
+	 * Opening a file manager can take Windows several seconds, during which the button looks
+	 * dead and gets pressed again — and every one of those presses opens another window. So the
+	 * button reports that it is working and refuses to start a second one until the first is done.
+	 */
 	async openLogFolder() {
+		if (this._openingFolder) return;
+		this._openingFolder = true;
+		let button = document.getElementById('byok-log-open');
+		if (button) button.disabled = true;
 		let Log = Zotero.BYOKTTS.Log;
-		await Log.flush();
 		try {
-			// reveal() selects the file when it exists; fall back to the profile folder
-			if (await Log.size()) {
-				await Zotero.File.reveal(Log.path);
-			}
-			else {
-				await Zotero.File.reveal(Zotero.Profile.dir);
-				this.statusL10n('byok-msg-log-none-yet');
-			}
+			await this.statusL10n('byok-msg-log-opening');
+			await Log.flush();
+			// The folder is created here rather than only on the first write, so the button has
+			// somewhere to go even when nothing has ever been logged
+			await Log.ensureDir();
+			let empty = !(await Log.size());
+			// reveal() selects the file when there is one; otherwise just open the folder
+			await Zotero.File.reveal(empty ? Log.dir : Log.path);
+			if (empty) this.statusL10n('byok-msg-log-none-yet');
+			else this.statusL10n('byok-msg-log-opened', { path: Log.dir });
 		}
 		catch (e) {
 			Zotero.logError(e);
 			this.statusL10n('byok-msg-folder-failed', { detail: e.message || String(e) }, true);
+		}
+		finally {
+			this._openingFolder = false;
+			if (button) button.disabled = false;
 		}
 	},
 
@@ -1035,6 +1049,12 @@ var Zotero_BYOK_TTS = {
 	async tailLog() {
 		let Log = Zotero.BYOKTTS.Log;
 		await Log.flush();
+		// "file does not exist" is a true but useless answer when the real reason is that logging
+		// was never switched on, or is on but has not been given anything to record yet
+		if (!(await Log.size())) {
+			this.statusL10n(Log.enabled() ? 'byok-msg-log-none-yet' : 'byok-msg-log-off', null, true);
+			return;
+		}
 		try {
 			let text = await Zotero.File.getContentsAsync(Log.path);
 			let lines = String(text).trim().split('\n');

@@ -246,6 +246,9 @@ byok-msg-cache-failed = Could not clear the cache: { $detail }
 byok-msg-no-errors = No playback errors recorded since Zotero started.
 byok-msg-log-empty = The log is empty.
 byok-msg-log-none-yet = No log yet — switch logging on, reopen the PDF, and play a little.
+byok-msg-log-opening = Opening the log folder…
+byok-msg-log-opened = Opened { $path }
+byok-msg-log-off = Logging is switched off, so there is nothing to show. Switch it on above, reopen the PDF, and play a little.
 byok-msg-log-cleared = Log cleared. Reopen the PDF to capture a fresh run from the start.
 byok-msg-log-tail = { $path }
     { $entries } entries, last 40:

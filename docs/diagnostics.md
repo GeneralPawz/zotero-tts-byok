@@ -20,7 +20,11 @@ of your own in place of the built-in sample — useful for hearing one emotion t
 ![Logging](../media/settings-logging.png)
 
 **Write a diagnostic log (JSONL)** in the preferences pane appends one JSON object per line to
-`byok-tts.jsonl` in the Zotero profile. Off by default. It records:
+`byok-tts/byok-tts.jsonl` under your Zotero data directory — a folder of its own, so it is
+findable when you want it and obviously not Zotero's own when you don't. **Open log folder** in
+the Logging section goes straight there and creates the folder if nothing has been logged yet; a
+log written by a build before 1.13.0 is moved out of the profile root on first use. Off by
+default. It records:
 
 | Event | Contents |
 | --- | --- |
