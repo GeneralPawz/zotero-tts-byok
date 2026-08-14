@@ -60,20 +60,52 @@ itself is not read out:
 
 ![Speakers](../images/settings-speakers.png)
 
-Set the tags under **Speakers** in the settings, each pointing at one of your voices — a female
-voice for Mara, a male one for Theo. **Voice for untagged text** in the same section covers
-everything no tag claims: narration, headings, ordinary prose. Leave it unset and that text keeps
-the voice chosen in the reader; set it and a story reads as a narrator plus its characters.
+> [!NOTE]
+> **[Watch it working](../images/multi-speaker.mp4)** — half a minute of the speaking test being
+> read by a narrator and two characters. The recording has sound, which is rather the point.
+> GitHub opens `.mp4` files in a player; the file is also in the repository under `images/`.
 
-Speaker and emotion tags combine, and the speaker tag has to come first. With sentence chunks the
-split falls where you would want it — `[Mara] [angry] “Theo!”` is Mara, and the narration sentence
-after it is the narrator.
+#### Setting it up
+
+Three things have to line up, and the second is the one people miss:
+
+1. **The voices exist.** Each speaker points at a voice **id** from your Voices list, so add the
+   voices first. A speaker naming a voice that is not configured is ignored rather than guessed at.
+2. **The tag starts the line.** `matchSpeaker` looks at the beginning of a segment only — a tag in
+   the middle of a sentence is left alone and read out as text.
+3. **A voice for untagged text**, if you want a narrator. Left unset, narration simply keeps
+   whichever voice is selected in the reader, which is also a perfectly good arrangement.
+
+A worked example, matching the speaking test:
+
+| Setting | Value |
+| --- | --- |
+| Voices | `Zephyr`, `Puck`, `Charon` (or any three from your provider) |
+| Speaker `Mara` | `Kore` |
+| Speaker `Theo` | `Puck` |
+| Voice for untagged text | `Charon` |
+
+```
+[Mara] [angry] “Theo!” She lowered the rolling pin by perhaps two inches.
+```
+
+read as sentence chunks becomes two requests: `“Theo!”` in Mara's voice with the tags stripped,
+then `She lowered the rolling pin…` in the narrator's. Switch to paragraph chunks and the whole
+passage goes to Mara instead, because the speaker tag is decided per segment — sentences are what
+give you the alternation.
+
+#### What it does not do
 
 Automatic speaker detection is not attempted. Attribution in prose is genuinely ambiguous —
-consecutive lines by one character, unattributed replies — and guessing wrong is worse than not
-guessing, so the tags are explicit.
+consecutive lines by one character, unattributed replies, dialogue split by a beat of narration —
+and guessing wrong is worse than not guessing, so the tags are explicit.
 
-There is a document for trying them:
+Tags also have to be in the document. There is no way to tag a PDF you did not write, so this is
+for material you control: notes, drafts, translations, anything exported to PDF yourself.
+
+### Trying it
+
+There is a document for trying all of this:
 **[speaking-test.pdf](https://github.com/GeneralPawz/zotero-tts-byok/releases/latest/download/speaking-test.pdf)**,
 attached to every release. Add it to Zotero and read it aloud to hear a voice handle the whole set
 in context, rather than one tag at a time in the prompt box.

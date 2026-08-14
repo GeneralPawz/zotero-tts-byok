@@ -71,8 +71,10 @@ Everything else — the provider, the key, the model — is yours to choose.
 
 It uses every one of the eighteen tested emotion tags at least once, and its dialogue is tagged
 for two characters, so configuring speakers named `Mara` and `Theo` plus a voice for untagged text
-gives you a narrator and a cast rather than one voice reading everything. See
-[Speaking style](docs/speaking-style.md) for how the tags work.
+gives you a narrator and a cast rather than one voice reading everything.
+
+**[Watch that working](images/multi-speaker.mp4)** — half a minute of the scene read by three
+voices, with sound. [Speaking style](docs/speaking-style.md) explains how to set it up.
 
 ## How it works, briefly 🔍
 

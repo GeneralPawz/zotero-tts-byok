@@ -7,3 +7,5 @@
 
 *.png binary
 *.xpi binary
+*.mp4 binary
+*.pdf binary
