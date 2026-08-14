@@ -246,6 +246,16 @@ the brackets do.
 | Displeasure | `[annoyed]`, `[bitter]`, `[angry]`, `[hostile]`, `[disgusted]` |
 | Delivery | `[whispering]` |
 
+There is a document for trying them. `test/fixtures/speaking-test.txt` is a short scene that uses
+every tag above at least once, and
+
+```
+node scripts/make-speaking-test.mjs
+```
+
+turns it into `target/speaking-test.pdf`. Add that to Zotero and read it aloud to hear how a voice
+handles the whole set in context, rather than one tag at a time in the prompt box.
+
 Tags apply from where they appear until the mood shifts, so they can be mixed inside one passage:
 
 ```
@@ -359,7 +369,8 @@ src/            everything that ships inside the .xpi
   prefs/        pane.xhtml, pane.js, pane.css
   locale/       en-US, de — picked up automatically by Zotero
 test/           node checks, not packaged
-scripts/        make-update-manifest.mjs
+  fixtures/     speaking-test.txt, the emotion tag scene
+scripts/        make-update-manifest.mjs, make-speaking-test.mjs
 .github/        CI on every push, release on every v* tag
 images/         README screenshots
 target/         build output, gitignored
