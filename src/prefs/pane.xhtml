@@ -1,23 +1,11 @@
 <vbox onload="event.waitUntil(Zotero.BYOKTTS.pane.init())">
-	<!-- Sticky, so settings can be changed anywhere on the page and heard without scrolling -->
-	<vbox id="byok-sticky">
-		<hbox align="center">
-			<button id="byok-test" data-l10n-id="byok-test-now"
-				oncommand="Zotero.BYOKTTS.pane.test()"/>
-			<description class="byok-hint" data-l10n-id="byok-test-hint"/>
-			<spacer flex="1"/>
-			<description id="byok-version" class="byok-hint"/>
-		</hbox>
-
-		<vbox id="byok-status-box" hidden="true">
-			<html:textarea id="byok-status" class="byok-wide byok-mono" rows="4"
-				readonly="readonly"/>
-			<hbox>
-				<button id="byok-copy-status" data-l10n-id="byok-copy-message"
-					oncommand="Zotero.BYOKTTS.pane.copyStatus()"/>
-			</hbox>
-		</vbox>
-	</vbox>
+	<!-- Stays in view while scrolling; shows the last result and jumps to the test controls -->
+	<hbox id="byok-sticky" align="center">
+		<button id="byok-jump-test" class="byok-state-idle"
+			data-l10n-id="byok-jump-test"
+			oncommand="Zotero.BYOKTTS.pane.jumpToTest()"/>
+		<description id="byok-sticky-summary" class="byok-hint"/>
+	</hbox>
 
 	<groupbox class="main-section">
 		<label><html:h2 data-l10n-id="byok-provider-heading"/></label>
@@ -308,13 +296,30 @@
 		<description id="byok-log-path" class="byok-hint"/>
 	</groupbox>
 
-	<groupbox>
+	<groupbox id="byok-maintenance">
 		<label><html:h2 data-l10n-id="byok-maintenance-heading"/></label>
 		<hbox align="center">
+			<button id="byok-test" data-l10n-id="byok-test-now"
+				oncommand="Zotero.BYOKTTS.pane.test()"/>
 			<button id="byok-clear-cache" data-l10n-id="byok-clear-cache"
 				oncommand="Zotero.BYOKTTS.pane.clearCache()"/>
 			<button id="byok-last-error" data-l10n-id="byok-last-error"
 				oncommand="Zotero.BYOKTTS.pane.showLastError()"/>
 		</hbox>
+
+		<vbox id="byok-status-box" hidden="true">
+			<html:textarea id="byok-status" class="byok-wide byok-mono" rows="4"
+				readonly="readonly"/>
+			<hbox>
+				<button id="byok-copy-status" data-l10n-id="byok-copy-message"
+					oncommand="Zotero.BYOKTTS.pane.copyStatus()"/>
+			</hbox>
+		</vbox>
+	</groupbox>
+
+	<groupbox>
+		<label><html:h2 data-l10n-id="byok-about-heading"/></label>
+		<description id="byok-version" class="byok-hint"/>
+		<description class="byok-hint" data-l10n-id="byok-about-license"/>
 	</groupbox>
 </vbox>

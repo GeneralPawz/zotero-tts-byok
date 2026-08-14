@@ -18,20 +18,35 @@
 	color: #cc2936;
 }
 
-/* Test bar — stays in view so settings can be changed anywhere and heard immediately */
+/*
+	Test bar — stays in view so a problem is visible from anywhere on the page.
+	The preferences window paints itself with --material-sidepane, not --material-background,
+	so anything else here reads as a white strip against the pane.
+*/
 #byok-sticky {
 	position: sticky;
 	top: 0;
 	z-index: 5;
-	gap: 6px;
+	gap: 8px;
 	padding: 8px 0;
 	margin-bottom: 4px;
-	background: var(--material-background, Field);
-	border-bottom: 1px solid var(--fill-quinary, rgba(128, 128, 128, .25));
+	background: var(--material-sidepane, Field);
+	border-bottom: 1px solid var(--material-border-quinary, rgba(128, 128, 128, .25));
 }
 
-#byok-sticky #byok-test {
+#byok-jump-test {
 	font-weight: 600;
+	border-inline-start: 3px solid transparent;
+}
+
+#byok-jump-test.byok-state-ok {
+	border-inline-start-color: var(--accent-green, #39bf68);
+	color: var(--accent-green, #39bf68);
+}
+
+#byok-jump-test.byok-state-error {
+	border-inline-start-color: var(--accent-red, #db2c3a);
+	color: var(--accent-red, #db2c3a);
 }
 
 #byok-status {

@@ -62,7 +62,10 @@ var Zotero_BYOK_TTS = {
 
 		let stamp = document.getElementById('byok-version');
 		if (stamp) {
-			stamp.textContent = `${Zotero.BYOKTTS.version || '?'} · Zotero ${Zotero.version}`;
+			document.l10n.setAttributes(stamp, 'byok-version-line', {
+				plugin: Zotero.BYOKTTS.version || '?',
+				zotero: Zotero.version
+			});
 		}
 
 		this.bindVoiceEditor();
@@ -109,6 +112,36 @@ var Zotero_BYOK_TTS = {
 		elem.value = message || '';
 		elem.classList.toggle('byok-error', !!isError);
 		if (box) box.hidden = !message;
+		if (message) this.setState(isError ? 'error' : 'ok');
+	},
+
+	/**
+	 * Colour the sticky button by the last outcome, so a problem is visible from anywhere on
+	 * the page without the output panel having to be open.
+	 */
+	setState(state) {
+		let button = document.getElementById('byok-jump-test');
+		let summary = document.getElementById('byok-sticky-summary');
+		if (!button) return;
+		button.classList.remove('byok-state-idle', 'byok-state-ok', 'byok-state-error');
+		button.classList.add('byok-state-' + state);
+		if (!summary) return;
+		if (state === 'idle') {
+			summary.removeAttribute('data-l10n-id');
+			summary.textContent = '';
+		}
+		else {
+			document.l10n.setAttributes(summary,
+				state === 'ok' ? 'byok-sticky-ok' : 'byok-sticky-error');
+		}
+	},
+
+	/** Scroll to the test controls and leave focus there. */
+	jumpToTest() {
+		let section = document.getElementById('byok-maintenance');
+		if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		let button = document.getElementById('byok-test');
+		if (button) setTimeout(() => button.focus(), 250);
 	},
 
 	copyStatus() {
@@ -162,8 +195,24 @@ var Zotero_BYOK_TTS = {
 		});
 	},
 
+	/**
+	 * Read a control's own value rather than its preference.
+	 *
+	 * XUL compiles an inline oncommand attribute when the element is parsed, which is before
+	 * Zotero attaches the listener that writes the preference — so a handler reading the pref
+	 * sees the previous value and the UI lags one click behind. The element itself is always
+	 * current.
+	 */
+	controlValue(id, fallbackPref) {
+		let elem = document.getElementById(id);
+		let value = elem && elem.value;
+		return (value === undefined || value === null || value === '')
+			? this.getPref(fallbackPref)
+			: value;
+	},
+
 	updateVoicesView() {
-		let view = this.getPref('voicesView') === 'json' ? 'json' : 'list';
+		let view = this.controlValue('byok-voices-view', 'voicesView') === 'json' ? 'json' : 'list';
 		let list = document.getElementById('byok-voices-list-view');
 		let json = document.getElementById('byok-voices-json-view');
 		if (list) list.hidden = view !== 'list';
@@ -265,7 +314,8 @@ var Zotero_BYOK_TTS = {
 		if (!area || !pre) return;
 
 		let escape = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-		let source = area.value;
+		// The textarea can be value-less for a tick before the preference binding populates it
+		let source = area.value || '';
 		let html = '';
 		// key | string | number | literal | punctuation, in that order
 		let token = /("(?:[^"\\]|\\.)*"\s*:)|("(?:[^"\\]|\\.)*")|(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)|\b(true|false|null)\b|([{}\[\],:])/g;
@@ -291,7 +341,7 @@ var Zotero_BYOK_TTS = {
 	 * the user typed themselves — only empties and other providers' defaults.
 	 */
 	onProviderChange(initialLoad) {
-		let provider = this.getPref('provider') || 'openai';
+		let provider = this.controlValue('byok-provider', 'provider') || 'openai';
 		let defaults = this.DEFAULTS[provider] || this.DEFAULTS.openai;
 
 		if (!initialLoad) {
@@ -317,8 +367,8 @@ var Zotero_BYOK_TTS = {
 
 	// Also called directly when the audio format changes, which must not re-apply defaults
 	updateVisibility() {
-		let provider = this.getPref('provider') || 'openai';
-		let isPCM = this.getPref('format') === 'pcm';
+		let provider = this.controlValue('byok-provider', 'provider') || 'openai';
+		let isPCM = this.controlValue('byok-format', 'format') === 'pcm';
 
 		let show = (id, visible) => {
 			let elem = document.getElementById(id);

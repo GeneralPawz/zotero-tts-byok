@@ -41,7 +41,8 @@ Download `read-aloud-byok.xpi` from
 ```
 
 Then in Zotero: Tools → Plugins → gear icon → **Install Plugin From File…** → pick the `.xpi`,
-and open Edit → Settings → **Read Aloud BYOK**. The pane header shows the running version.
+and open Edit → Settings → **Read Aloud BYOK**. The **About** section at the foot of the pane
+shows which build is actually running.
 
 If a PDF tab is already open, close and reopen it — the voice list is fetched when the reader
 initialises.
@@ -49,10 +50,9 @@ initialises.
 ## About the update URL
 
 Zotero refuses to install any plugin whose manifest lacks `applications.zotero.update_url`, and
-disables one whose update URL isn't `https:`. This plugin points at
-`https://localhost/zotero-byok-tts/update.json`, which satisfies both rules without sending
-anything off the machine — update checks just fail quietly against a closed local port.
-`update.json` is included if you ever want to host it for real; change both URLs to match.
+disables one whose update URL isn't `https:` — a non-HTTPS one does not merely skip updates, it
+marks the add-on as broken. The manifest points at `update.json` in this repository, which in turn
+points at the current release asset. Bumping a version means editing both.
 
 ## Requirements
 
@@ -340,6 +340,7 @@ values. `node test/check-l10n.js` reports any string that is missing, untranslat
 node test/run-tests.js       skip rules, against fixtures from real documents
 node test/check-l10n.js      every string resolves in every locale; handlers exist
 node test/check-highlight.js the JSON highlighter round-trips exactly
+node test/check-pane.js      pane logic: view toggles, row visibility, status state
 ```
 
 The skip fixtures are an academic paper and a furniture-heavy standards page with a library

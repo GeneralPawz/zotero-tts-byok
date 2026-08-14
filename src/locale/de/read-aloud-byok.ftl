@@ -2,7 +2,6 @@
 
 byok-test-now =
     .label = Testsatz vorlesen
-byok-test-hint = Spielt die erste eingerichtete Stimme mit den aktuellen Einstellungen ab.
 
 ## Anbieter
 
@@ -159,6 +158,14 @@ byok-last-error =
 byok-copy-message =
     .label = Meldung kopieren
 byok-copied = Kopiert
+
+byok-jump-test =
+    .label = Stimme testen
+byok-about-heading = Über
+byok-about-license = Read Aloud BYOK — MIT-Lizenz. github.com/GeneralPawz/zotero-tts-byok
+byok-sticky-ok = Letzter Test erfolgreich
+byok-sticky-error = Letzte Aktion meldete ein Problem
+byok-version-line = Plugin { $plugin } · Zotero { $zotero }
 
 ## Statusmeldungen
 
