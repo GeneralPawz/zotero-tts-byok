@@ -1,0 +1,18 @@
+{
+	"manifest_version": 2,
+	"name": "Read Aloud BYOK",
+	"version": "1.4.0",
+	"description": "Route Zotero's built-in Read Aloud through your own text-to-speech API key (OpenAI-compatible, ElevenLabs, Azure, Gemini, or any custom endpoint).",
+	"homepage_url": "https://github.com/GeneralPawz/zotero-tts-byok",
+	"icons": {
+		"96": "icon.png"
+	},
+	"applications": {
+		"zotero": {
+			"id": "byok-tts@local",
+			"update_url": "https://raw.githubusercontent.com/GeneralPawz/zotero-tts-byok/main/update.json",
+			"strict_min_version": "7.999",
+			"strict_max_version": "10.999.999"
+		}
+	}
+}

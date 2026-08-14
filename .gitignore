@@ -1,0 +1,7 @@
+# Build output
+*.xpi
+
+# Diagnostic log, if anyone runs the plugin from a checkout
+*.jsonl
+
+node_modules/

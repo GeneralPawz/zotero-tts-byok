@@ -1,0 +1,301 @@
+# Read Aloud BYOK
+
+Bring your own text-to-speech key to Zotero 9's built-in Read Aloud, instead of spending Zotero's
+metered Standard/Premium minutes or falling back to the local SAPI voices.
+
+Works with OpenAI-compatible endpoints (including OpenRouter and self-hosted servers), ElevenLabs,
+Speechify, Azure Speech, Google Gemini TTS, or any custom endpoint. Adds a **Skip** panel to the
+reader for leaving out titles, running heads, footnotes, tables, formulas, citations, URLs and
+bracketed asides — and stitches sentences broken across a page break back together.
+
+Requires Zotero 9. MIT licensed.
+
+## How it works
+
+Zotero's reader gets its voice catalog and its audio from the parent process through two methods on
+`Zotero.Sync.APIClient.prototype`:
+
+| Method | Called for |
+| --- | --- |
+| `getReadAloudVoices()` | Populating the voice picker (`GET /tts/voices`) |
+| `getReadAloudAudio(segment, voiceID)` | Every sentence or paragraph (`POST /tts/speak`) |
+
+This plugin wraps both. Voices you configure are merged into the catalog under a namespaced
+`byok:` ID, and any audio request for one of those IDs is answered by your provider rather than
+`api.zotero.org`. Everything else stays stock Zotero: sentence segmentation, the three-segment
+prefetch, the parent-process audio cache, playback speed, sentence highlighting, annotation from
+the reading position, and resume-where-you-left-off.
+
+Because `creditsPerMinute` is reported as `0`, the reader shows no quota bar and never offers to
+sell you more minutes for these voices.
+
+## Install
+
+Download `read-aloud-byok.xpi` from
+[Releases](https://github.com/GeneralPawz/zotero-tts-byok/releases), or build it from a checkout:
+
+```powershell
+.\build.ps1
+```
+
+Then in Zotero: Tools → Plugins → gear icon → **Install Plugin From File…** → pick the `.xpi`,
+and open Edit → Settings → **Read Aloud BYOK**. The pane header shows the running version.
+
+If a PDF tab is already open, close and reopen it — the voice list is fetched when the reader
+initialises.
+
+## About the update URL
+
+Zotero refuses to install any plugin whose manifest lacks `applications.zotero.update_url`, and
+disables one whose update URL isn't `https:`. This plugin points at
+`https://localhost/zotero-byok-tts/update.json`, which satisfies both rules without sending
+anything off the machine — update checks just fail quietly against a closed local port.
+`update.json` is included if you ever want to host it for real; change both URLs to match.
+
+## Requirements
+
+You must be signed in to a Zotero account. The reader only asks for remote voices at all when
+`Zotero.Sync.Runner.enabled` is true, and that check happens before this plugin is consulted. No
+Zotero credits are consumed by your own voices.
+
+## Provider setup
+
+### OpenAI-compatible
+
+Works with OpenAI, Groq, DeepInfra, Lemonfox, and self-hosted servers that implement
+`POST /v1/audio/speech` — Kokoro-FastAPI, Speaches, openedai-speech, LM Studio.
+
+| Field | Example |
+| --- | --- |
+| Base URL | `https://api.openai.com/v1` or `http://127.0.0.1:8880/v1` |
+| Model | `gpt-4o-mini-tts`, `tts-1`, `kokoro` |
+| Audio format | `mp3` |
+
+For local servers, **Load from provider…** reads `GET /audio/voices`. `api.openai.com` has no such
+endpoint, so its voices are pre-filled instead.
+
+### OpenRouter
+
+Also OpenAI-compatible — one key across every TTS provider it routes to.
+
+| Field | Value |
+| --- | --- |
+| Provider | OpenAI-compatible |
+| Base URL | `https://openrouter.ai/api/v1` |
+| Model | a speech slug, e.g. `google/gemini-3.1-flash-tts-preview` |
+| Audio format | `mp3`, or `pcm` for models that refuse everything else |
+
+OpenRouter reports *that* a model accepts `response_format` but not which values, so a mismatch
+only shows up as `HTTP 400`. Gemini TTS in particular accepts **`pcm` only** — select that and the
+plugin adds a WAV header at the configured sample rate (24000 for Gemini and OpenAI).
+
+OpenRouter's speech models are **not** in its default `/models` listing, and there is no OpenAI TTS
+model on it at all — `openai/gpt-4o-mini-tts` and the voices `alloy`/`nova` do not exist there.
+**Load from provider…** queries `/models?output_modalities=speech`, matches your configured model,
+and fills in its `supported_voices`; if the slug is wrong it lists every valid one.
+
+Some slugs, cheapest first: `google/gemini-3.1-flash-tts-preview` (30 multilingual voices),
+`hexgrad/kokoro-82m` (54 voices, no German), `microsoft/mai-voice-2-flash`,
+`mistralai/voxtral-mini-tts-2603`, `deepgram/aura-2` (90 voices incl. 7 German), `x-ai/grok-voice-tts-1.0`.
+
+### ElevenLabs
+
+| Field | Example |
+| --- | --- |
+| Base URL | `https://api.elevenlabs.io/v1` |
+| Model | `eleven_turbo_v2_5` (fast/cheap) or `eleven_multilingual_v2` (best quality) |
+
+**Load from provider…** pulls your voice library, including cloned voices. Voice IDs are the
+ElevenLabs `voice_id` values.
+
+### Speechify
+
+| Field | Example |
+| --- | --- |
+| Base URL | `https://api.speechify.ai/v1` |
+| API key | from `platform.speechify.ai/api-keys`, sent as `Authorization: Bearer` |
+| Model | `simba-3.0` (default), `simba-3.2`, `simba-english`, `simba-multilingual` |
+
+Uses `POST /audio/speech`, which returns base64 audio in `audio_data`; the plugin requests mp3 and
+decodes it. The voice's locale is passed as `language` so multilingual models pick the right accent.
+
+**Load from provider…** reads `GET /voices`, following `next_cursor` pagination, and derives each
+voice's languages from the locales its models declare.
+
+### Azure Speech
+
+| Field | Example |
+| --- | --- |
+| Region or endpoint URL | `westeurope`, or a full custom endpoint URL |
+| API key | Your Speech resource key |
+| Voice IDs | `de-DE-KatjaNeural`, `en-US-AvaNeural` |
+
+Requests are sent as SSML; the voice ID is the Azure short name. Enter voices manually.
+
+### Google Gemini TTS
+
+| Field | Example |
+| --- | --- |
+| Base URL | `https://generativelanguage.googleapis.com/v1beta` |
+| Model | `gemini-2.5-flash-preview-tts` |
+| Voice IDs | `Kore`, `Puck`, `Charon`, `Zephyr` |
+
+Gemini returns headerless 24 kHz mono PCM, which the plugin wraps in a WAV container before
+handing it to the reader.
+
+### Custom endpoint
+
+For anything else. Placeholders `{{text}}`, `{{voice}}`, `{{model}}`, `{{lang}}` and `{{key}}` are
+substituted into the URL, headers and body. Values going into the JSON body are string-escaped, so
+quotes and newlines in the source text can't break the request.
+
+If the endpoint returns raw audio bytes, leave **Audio path** empty. If it returns base64 inside
+JSON, give the dotted path to it, plus a MIME type — or a **Raw PCM sample rate** if the payload
+has no container.
+
+## Voice list format
+
+```json
+[
+  { "id": "nova", "label": "Nova", "locales": ["en", "de"] },
+  { "id": "de-DE-KatjaNeural", "label": "Katja", "locales": ["de-DE"] }
+]
+```
+
+`locales` decides which reader languages offer the voice. The reader picks a language from the
+document, so a voice needs a matching locale listed to show up.
+
+Use a **bare language code** (`en`, `de`) for multilingual voices: the reader offers a
+region-tagged voice only for documents in that exact region, but an untagged one for every region,
+so `en-US` would hide the voice from an `en-GB` document. Tag the region only when the voice really
+is region-specific, as Azure's neural voices are.
+
+## Speaking style
+
+Expressive models take direction in natural language. Gemini's convention is to put it in the text
+itself — `Say cheerfully: Have a wonderful day!` — and it also honours inline tags like
+`[whispers]`, `[shouting]`, `[excited]` and `[sigh]`. OpenAI's expressive models instead read an
+`instructions` field. The **Send it** dropdown picks which of the two the plugin uses.
+
+In prepend mode the prompt is glued to the front of every segment, joined by a space if it ends in
+a colon or dash and by a blank line otherwise, so both of these work:
+
+```
+Say the following calmly and clearly, at a measured pace:
+```
+```
+You are reading an academic paper aloud to a colleague. Keep the tone even and unhurried.
+```
+
+Two things to know. Zotero's audio cache is keyed on the voice and the *source* text, not the style
+prompt, so **Clear cached audio** after changing it or you'll keep hearing the previous delivery.
+And direction lands more reliably on paragraphs than on single sentences — if a model starts
+reading the instruction aloud, switch the chunk size to paragraphs.
+
+**Extra request JSON** is merged over the request body for provider-specific controls, such as
+`{"provider":{"options":{"style":"cheerful","styledegree":1.5}}}` for Azure MAI-Voice-2 via
+OpenRouter.
+
+## Skip
+
+A **Skip** row is added to the reader's Read Aloud popup; clicking it reveals toggles for what to
+leave out. The same toggles are mirrored in this plugin's preferences pane.
+
+Skipped passages are never sent to the provider, so they cost nothing. How they are removed depends
+on one setting:
+
+- **Cut skipped passages out of the reading order** (default): when a document opens, the reader's
+  own segment list is measured, pruned, and sentences split across a page break are stitched back
+  together. Playback then never reaches the skipped passages at all — no pause at page boundaries,
+  and a broken sentence is spoken as one. Because this happens at open time, changing a skip
+  setting takes effect the next time the document is opened.
+- With it off, skipped segments stay in the list and are answered locally with a beat of silence.
+  Changes take effect immediately, but playback visibly steps over each skipped passage.
+
+Anything the rewrite misses still falls back to the silence path, so the two work together.
+
+Two kinds of rule:
+
+**Exact text rules** rewrite the sentence before it is spoken.
+
+| Rule | Removes |
+| --- | --- |
+| Text in ( ) [ ] { } | Balanced pairs including nested ones, so `(see Fig. 2 (right))` goes entirely |
+| Citations | `[12]`, `[3, 4]`, `(Smith et al., 2020)`, `(Doe & Roe 1999; Lee 2001)`, trailing markers |
+| URLs and DOIs | `http(s)://…`, `www.…`, `doi:…`, bare `10.xxxx/…`, e-mail addresses |
+
+**Layout rules** drop a whole segment, and are best-effort. Zotero gives each segment a page index
+and its rectangles, so rect height stands in for font size:
+
+| Rule | How it decides |
+| --- | --- |
+| Title and authors | Page one up to the first run of 100+ characters, capped at 20 segments |
+| Running heads and footers | Lines up to 200 chars whose text, with digits normalised, repeats on 2+ pages |
+| Footnotes | Type noticeably smaller than the document's median |
+| Formulas | Dense in operators, and too few real words to be a sentence |
+| Tables | Mostly numeric cells, or rectangles separated by wide column gaps |
+
+The layout rules need the document measured first, which reads the reader's internal segment list.
+Measuring happens when the reader panel opens and, failing that, before the first segment is
+spoken. If it fails the rules simply stay inactive — press **Skip diagnostics** in the preferences
+pane to see whether a document was measured and exactly which repeated lines were found.
+
+Citation stripping is heuristic where trailing superscript markers are concerned: `…as shown.12`
+loses the marker, but so would `sample1` if it appeared in running text.
+
+**Always skip lines containing** is the escape hatch for anything the heuristics miss — library
+watermarks and print stamps in particular, whose text extraction can differ from page to page so
+that the repeated-line rule never sees two identical copies. One plain, case-insensitive string per
+line, matched anywhere in a segment.
+
+## Diagnostic log
+
+**Write a diagnostic log (JSONL)** in the preferences pane appends one JSON object per line to
+`byok-tts.jsonl` in the Zotero profile. Off by default. It records:
+
+| Event | Contents |
+| --- | --- |
+| `session` | plugin build, Zotero version, every effective setting |
+| `prepare` | whether the reading order could be rewritten, and the segment counts |
+| `analyze` | measured body height, margin band, front-matter boundary, repeated lines found |
+| `rewrite` | how many segments were dropped and stitched, and whether it took effect |
+| `segment` | every skip/speak decision with the rule, page, height, position and text |
+| `request` | provider, model, voice, characters sent, duration, bytes or error |
+
+The API key is never written — only `apiKeySet: true/false`. **Show log file** reveals it, **Show
+last entries** prints the tail into the copyable status box, **Clear log** starts fresh.
+
+The pane header shows the running plugin and Zotero versions, so it is always possible to confirm
+which build is actually loaded.
+
+## Tests
+
+`node test/run-tests.js` exercises the skip rules against fixtures taken from real documents — an
+academic paper and a furniture-heavy standards page with a mangled library watermark. Every case
+came from a bug; they should stay passing.
+
+## Settings
+
+- **Show voices under** — which tier tab holds your voices. Premium by default.
+- **Send text in chunks of** — sentences start playing sooner and highlight precisely; paragraphs
+  sound more natural across clause boundaries and cost fewer requests, but buffer longer.
+- **Hide Zotero's own Standard and Premium voices** — keeps you from accidentally spending
+  remaining Zotero credits. Local system voices are unaffected.
+- **Clear cached audio** — drops Zotero's `read-aloud` cache. Cache keys include the voice ID, so
+  this is only needed after changing a provider while keeping the same voice IDs.
+- **Show last reader error** — the reader itself can only say "An unknown error occurred", so the
+  full provider response from the last failed playback is kept and shown here.
+
+Messages appear in a selectable box with a **Copy message** button; provider errors are quoted in
+full up to 2000 characters.
+
+## Notes
+
+- Audio must be in a format `AudioContext.decodeAudioData()` accepts: mp3, wav, flac, aac, or Opus
+  in an Ogg container. Raw PCM only works through the PCM sample-rate option.
+- Playback speed is applied by the reader, so the plugin always requests 1× from the provider.
+- Failed requests are not retried, so a bad key or a down server surfaces immediately in the
+  reader rather than stalling. Details go to Help → Debug Output Logging.
+- Your API key is stored in plain text in the profile's `prefs.js`, like other Zotero plugin
+  settings.
+- Text of the passages you play is sent to whichever provider you configure.
