@@ -746,14 +746,13 @@ Zotero.BYOKTTS = new function () {
 					let withVoices = models
 						.filter(m => (m.supported_voices || []).length)
 						.map(m => `${m.id} (${m.supported_voices.length})`);
+					let alternatives = withVoices.length
+						? ' Models that do publish voices: ' + withVoices.join(', ')
+						: '';
 					throw new Error(
 						`OpenRouter publishes no voice list for "${wanted}" — this model takes a voice `
 						+ 'id or reference audio of your own, so enter one by hand.'
-						+ (withVoices.length
-							? '
-
-Models that do publish voices: ' + withVoices.join(', ')
-							: '')
+						+ alternatives
 					);
 				}
 				return names.map(id => ({
