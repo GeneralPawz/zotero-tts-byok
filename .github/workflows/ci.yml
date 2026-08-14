@@ -17,6 +17,7 @@ jobs:
 
       - name: Tests
         run: |
+          node test/check-syntax.js
           node test/run-tests.js
           node test/check-cast.js
           node test/check-docprefs.js
