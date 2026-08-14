@@ -388,6 +388,20 @@ Both registries read the same `update.json` this repository already publishes, s
 ready to be listed as soon as an entry is submitted. They are expected to fold into the official
 directory when it arrives.
 
+## Screenshots
+
+The images in this README are rendered from the pane's own sources rather than captured from a
+running Zotero, using [zotero-plugin-ui-sim](https://github.com/GeneralPawz/zotero-plugin-ui-sim):
+
+```
+node scripts/sync-plugin.mjs read-aloud-byok D:/projects/zotero-tts-byok
+node scripts/capture.mjs read-aloud-byok --out D:/projects/zotero-tts-byok/images
+```
+
+It reads this plugin's real `pane.xhtml`, `pane.css` and `.ftl`, so a layout change shows up in
+the documentation without anyone reopening the settings window. `?theme=dark` and `?locale=de`
+render the other variants.
+
 ## Project layout
 
 ```

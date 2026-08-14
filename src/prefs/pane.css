@@ -94,9 +94,17 @@
 	box-sizing: border-box;
 }
 
-/* Keep the reveal control clear of the last character of the key */
+/*
+	Keep the reveal control clear of the last masked character. Padding on the input is the
+	wrong lever: Firefox lays the control out inside the content box, so padding pushes the
+	control itself inward and opens the gap to its right. The control needs its own margin.
+*/
 .byok-secret {
-	padding-inline-end: 26px;
+	padding-inline-end: 4px;
+}
+
+.byok-secret::-moz-reveal {
+	margin-inline-start: 10px;
 }
 
 .byok-combo {
