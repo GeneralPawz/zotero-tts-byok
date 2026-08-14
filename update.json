@@ -5,7 +5,7 @@
 				{
 					"version": "1.8.0",
 					"update_link": "https://github.com/GeneralPawz/zotero-tts-byok/releases/download/v1.8.0/read-aloud-byok.xpi",
-					"update_hash": "sha256:d2bec025b59c8d6edfaf0f39a48ac813fda84ae34142fd528248bce14f5763ba",
+					"update_hash": "sha256:c1000d4cfdee867b8a5d3c211e90414640b9b1b7359bb76e56cf4a05dd62aa28",
 					"update_info_url": "https://github.com/GeneralPawz/zotero-tts-byok/releases/tag/v1.8.0",
 					"applications": {
 						"zotero": {
