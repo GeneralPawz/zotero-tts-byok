@@ -101,8 +101,43 @@ Automatic speaker detection is not attempted. Attribution in prose is genuinely 
 consecutive lines by one character, unattributed replies, dialogue split by a beat of narration —
 and guessing wrong is worse than not guessing, so the tags are explicit.
 
-Tags also have to be in the document. There is no way to tag a PDF you did not write, so this is
-for material you control: notes, drafts, translations, anything exported to PDF yourself.
+Tags also have to be in the document, and there is no way to tag a PDF you did not write. For
+everything else there is the rotation below.
+
+### Alternating voices
+
+Most of what you read carries no speaker tags and never will. A standard, a paper, a report — you
+cannot write a cast into a document somebody else published. **Alternating voices** hands one two
+or more voices anyway, giving each a turn in rotation, so an hour of prose stops arriving as a
+single unbroken block.
+
+Pick how often the voice should change:
+
+| Every | Reads as |
+| --- | --- |
+| **Sentence** | Two readers trading lines. Busy over long stretches, good for dense argument |
+| **Paragraph** | The usual choice — a clear handover at each new thought |
+| **Page** | A voice per page; the least intrusive |
+| **Section** | A voice per numbered clause or heading, which suits standards |
+
+Then list the voices in the order they should take their turns. Two is the minimum, because one
+voice cannot alternate with itself; a third and fourth simply extend the cycle.
+
+Three things are worth knowing:
+
+1. **Speaker tags still win.** A document that has them keeps them; the rotation only picks up
+   what no tag claimed, so a tagged story and an untagged standard both behave sensibly.
+2. **Skipped passages do not use up a turn.** With running heads switched off in
+   [Skip rules](skip.md), the footer between two pages is not counted, so the paragraph after it
+   still alternates against the one before it rather than repeating that voice.
+3. **The assignment is fixed, not counted as it goes.** Which voice a paragraph gets depends only
+   on where it sits in the document, so seeking, re-reading, and Zotero's three-segment prefetch
+   all produce the same reading — and the audio cache keeps working.
+
+Section mode calls a line a heading when it is set larger than the body text, or when it is short
+and numbered like a clause (`4.2 Conformance`) without closing punctuation. On a document with no
+headings at all it will find no boundaries, and one voice reads the lot; paragraph mode is the
+safer default when in doubt.
 
 ### Trying it
 

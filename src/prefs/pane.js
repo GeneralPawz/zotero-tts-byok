@@ -77,6 +77,7 @@ var Zotero_BYOK_TTS = {
 		this.bindVoiceEditor();
 		this.bindControls();
 		this.renderSpeakers();
+		this.renderCast();
 		this.buildEmotionPicker();
 		this.onProviderChange(true);
 		this.refreshLogPath();
@@ -509,6 +510,101 @@ var Zotero_BYOK_TTS = {
 		this.writeSpeakers(speakers);
 	},
 
+	/* -------------------------------------------------------------- casting */
+
+	readCast() {
+		try {
+			let parsed = JSON.parse(this.getPref('cast.voices') || '[]');
+			return Array.isArray(parsed) ? parsed.filter(id => typeof id === 'string') : [];
+		}
+		catch (e) {
+			return [];
+		}
+	},
+
+	writeCast(ids) {
+		this.setPref('cast.voices', JSON.stringify(ids));
+		// A changed rotation has to be renumbered before the next segment is spoken
+		Zotero.BYOKTTS.Cast?.invalidate();
+		this.renderCast();
+	},
+
+	/**
+	 * The rotation is an ordered list rather than a set of checkboxes: which voice opens the
+	 * document and which answers it is worth being able to choose, and a set cannot express that.
+	 */
+	renderCast() {
+		let host = document.getElementById('byok-cast-rows');
+		let empty = document.getElementById('byok-cast-empty');
+		if (!host) return;
+		let ids = this.readCast();
+		let voices = Zotero.BYOKTTS.getVoices();
+		let off = (this.controlValue('byok-cast-mode', 'cast.mode') || 'off') === 'off';
+		host.replaceChildren();
+
+		// One voice cannot alternate with itself, so say so rather than looking merely empty
+		if (empty) {
+			empty.hidden = !(ids.length < 2);
+			document.l10n.setAttributes(empty,
+				ids.length ? 'byok-cast-needs-two' : 'byok-cast-empty');
+		}
+		// The container is a plain box, whose `disabled` property reflects to nothing the
+		// stylesheet can see, so the attribute is set explicitly
+		if (off) host.setAttribute('disabled', 'true');
+		else host.removeAttribute('disabled');
+		let add = document.getElementById('byok-cast-add');
+		if (add) add.disabled = off;
+
+		ids.forEach((id, index) => {
+			let row = document.createElement('div');
+			row.className = 'byok-speaker-row byok-cast-row';
+
+			let turn = document.createElement('span');
+			turn.className = 'byok-cast-turn';
+			turn.textContent = String(index + 1);
+
+			let picker = document.createXULElement('menulist');
+			picker.setAttribute('native', 'true');
+			let popup = document.createXULElement('menupopup');
+			for (let voice of voices) {
+				let item = document.createXULElement('menuitem');
+				item.setAttribute('value', voice.id);
+				item.setAttribute('label', voice.label || voice.id);
+				popup.append(item);
+			}
+			picker.append(popup);
+			picker.addEventListener('command', () => {
+				let all = this.readCast();
+				all[index] = picker.value;
+				this.writeCast(all);
+			});
+
+			let remove = document.createElement('button');
+			remove.type = 'button';
+			remove.className = 'byok-voice-remove';
+			remove.textContent = '✕';
+			document.l10n.setAttributes(remove, 'byok-voices-remove');
+			remove.addEventListener('click', () => {
+				let all = this.readCast();
+				all.splice(index, 1);
+				this.writeCast(all);
+			});
+
+			row.append(turn, picker, remove);
+			host.append(row);
+			picker.value = id || (voices[0] && voices[0].id) || '';
+		});
+	},
+
+	addCastVoice() {
+		let voices = Zotero.BYOKTTS.getVoices();
+		let ids = this.readCast();
+		// Offer the next unused voice, so adding two rows does not produce the same voice twice
+		let next = voices.find(v => !ids.includes(v.id)) || voices[0];
+		ids.push((next && next.id) || '');
+		this.writeCast(ids);
+	},
+
 	/* ------------------------------------------------------------- voices */
 
 	readVoices() {
@@ -525,8 +621,9 @@ var Zotero_BYOK_TTS = {
 		this.setPref('voices', JSON.stringify(voices, null, 2));
 		this.renderVoiceRows();
 		this.renderHighlight();
-		// The speaker rows pick their voice from this list
+		// The speaker rows and the rotation both pick their voices from this list
 		this.renderSpeakers();
+		this.renderCast();
 	},
 
 	/**
@@ -543,6 +640,11 @@ var Zotero_BYOK_TTS = {
 			if (elem) elem.addEventListener('command', handler);
 		};
 		on('byok-provider', () => this.onProviderChange());
+		// Switching the rotation off greys the list; switching the unit renumbers the document
+		on('byok-cast-mode', () => {
+			Zotero.BYOKTTS.Cast?.invalidate();
+			this.renderCast();
+		});
 		on('byok-format', () => this.updateVisibility());
 		on('byok-voices-view', () => this.updateVoicesView());
 

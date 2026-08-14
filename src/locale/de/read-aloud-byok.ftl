@@ -205,6 +205,27 @@ byok-speakers-default = Stimme für Text ohne Tag
 byok-speakers-default-hint = Erzähltext, Überschriften, alles ohne Tag. Nicht gesetzt lassen, um die im Reader gewählte Stimme zu behalten.
 byok-speakers-default-none = Im Reader gewählte Stimme
 
+## Wechselnde Stimmen
+
+byok-cast-heading = Wechselnde Stimmen
+byok-cast-hint = Die meisten Dokumente enthalten keine Sprecher-Tags und werden es nie. Dies gibt ihnen trotzdem zwei oder mehr Stimmen, die sich abwechseln, damit ein langer Fließtext nicht wie ein einziger Block klingt.
+byok-cast-mode = Stimme wechseln bei jedem/jeder
+byok-cast-mode-off =
+    .label = Aus — eine Stimme
+byok-cast-mode-sentence =
+    .label = Satz
+byok-cast-mode-paragraph =
+    .label = Absatz
+byok-cast-mode-page =
+    .label = Seite
+byok-cast-mode-section =
+    .label = Abschnitt (bei jeder Überschrift)
+byok-cast-add =
+    .label = Stimme zur Abfolge hinzufügen
+byok-cast-empty = Keine Stimmen in der Abfolge.
+byok-cast-needs-two = Eine zweite Stimme hinzufügen — eine Stimme allein kann sich nicht abwechseln.
+byok-cast-tags-hint = Sprecher-Tags haben weiterhin Vorrang, wo ein Dokument sie enthält, und übersprungene Passagen verbrauchen keinen Zug. Die Reihenfolge unten ist die Reihenfolge der Stimmen.
+
 ## Statusmeldungen
 
 byok-msg-loading-voices = Stimmen werden geladen …

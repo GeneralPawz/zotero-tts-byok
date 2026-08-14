@@ -247,6 +247,30 @@
 	overflow-x: hidden;
 }
 
+/* The rotation is an ordered list, so each row is numbered with the turn it takes */
+.byok-cast-row {
+	grid-template-columns: auto 1fr auto;
+}
+
+.byok-cast-turn {
+	min-width: 1.6em;
+	text-align: center;
+	opacity: 0.6;
+	font-variant-numeric: tabular-nums;
+}
+
+#byok-cast-rows {
+	max-height: calc(5 * 2.1em);
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+/* Switching the rotation off should look switched off, not merely empty */
+#byok-cast-rows[disabled="true"] {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
 /* Group headings inside the emotion menu */
 .byok-menu-heading {
 	font-weight: 600;

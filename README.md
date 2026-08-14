@@ -15,6 +15,10 @@ Speechify, Azure Speech, Google Gemini TTS, or any custom endpoint. Adds a **Ski
 reader for leaving out titles, running heads, footnotes, tables, formulas, citations, URLs and
 bracketed asides — and stitches sentences broken across a page break back together.
 
+Documents that carry no speaker tags — a standard, a paper, anything you did not write — can still
+be [read by two or more voices in turn](docs/speaking-style.md#alternating-voices), changing at
+each sentence, paragraph, page or section.
+
 ![Provider settings, with the test bar reporting a successful run](media/settings-provider.png)
 
 ## Install 🚀
@@ -59,7 +63,7 @@ Everything else — the provider, the key, the model — is yours to choose.
 | Page | What is in it |
 | --- | --- |
 | [Providers](docs/providers.md) | OpenAI-compatible endpoints, OpenRouter, ElevenLabs, Speechify, Azure, Gemini and custom endpoints; choosing a model; describing your voices |
-| [Speaking style](docs/speaking-style.md) | Style prompts, the tested inline emotion tags, and giving each character its own voice |
+| [Speaking style](docs/speaking-style.md) | Style prompts, the tested inline emotion tags, giving each character its own voice, and alternating voices through a document that has no tags at all |
 | [Skip rules](docs/skip.md) | Leaving out titles, running heads, footnotes, tables, formulas, citations, URLs and bracketed asides |
 | [Testing and diagnostics](docs/diagnostics.md) | The test bar, the JSONL log, and every setting the pane exposes |
 | [Development](docs/development.md) | How the integration works, repository layout, localisation, tests, releasing, and how the screenshots are made |

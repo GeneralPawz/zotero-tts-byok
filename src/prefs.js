@@ -53,3 +53,8 @@ pref("extensions.zotero.byokTTS.speakers", "[]");
 
 // Voice for anything no speaker tag claims — narration and headings
 pref("extensions.zotero.byokTTS.speakers.default", "");
+
+// Rotating voices over a document that carries no speaker tags: off, sentence, paragraph,
+// page or section. Needs at least two voices in the rotation to do anything.
+pref("extensions.zotero.byokTTS.cast.mode", "off");
+pref("extensions.zotero.byokTTS.cast.voices", "[]");

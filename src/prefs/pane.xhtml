@@ -247,6 +247,33 @@
 	</groupbox>
 
 	<groupbox>
+		<label><html:h2 data-l10n-id="byok-cast-heading"/></label>
+		<description class="byok-hint" data-l10n-id="byok-cast-hint"/>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-cast-mode" control="byok-cast-mode"/>
+			<menulist id="byok-cast-mode" native="true"
+				preference="extensions.zotero.byokTTS.cast.mode">
+				<menupopup>
+					<menuitem value="off" data-l10n-id="byok-cast-mode-off"/>
+					<menuitem value="sentence" data-l10n-id="byok-cast-mode-sentence"/>
+					<menuitem value="paragraph" data-l10n-id="byok-cast-mode-paragraph"/>
+					<menuitem value="page" data-l10n-id="byok-cast-mode-page"/>
+					<menuitem value="section" data-l10n-id="byok-cast-mode-section"/>
+				</menupopup>
+			</menulist>
+		</hbox>
+
+		<vbox id="byok-cast-rows"/>
+		<description id="byok-cast-empty" class="byok-hint" data-l10n-id="byok-cast-empty"/>
+		<hbox>
+			<button id="byok-cast-add" data-l10n-id="byok-cast-add"
+				oncommand="Zotero.BYOKTTS.pane.addCastVoice()"/>
+		</hbox>
+		<description class="byok-hint" data-l10n-id="byok-cast-tags-hint"/>
+	</groupbox>
+
+	<groupbox>
 		<label><html:h2 data-l10n-id="byok-reader-heading"/></label>
 
 		<hbox align="center">

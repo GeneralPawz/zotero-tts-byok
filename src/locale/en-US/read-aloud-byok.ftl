@@ -205,6 +205,27 @@ byok-speakers-default = Voice for untagged text
 byok-speakers-default-hint = Narration, headings, anything no tag claims. Leave unset to keep the voice chosen in the reader.
 byok-speakers-default-none = Reader’s chosen voice
 
+## Alternating voices
+
+byok-cast-heading = Alternating voices
+byok-cast-hint = Most documents carry no speaker tags and never will. This gives one to two or more voices anyway, handing each a turn in rotation so a long stretch of prose stops sounding like one unbroken block.
+byok-cast-mode = Change voice every
+byok-cast-mode-off =
+    .label = Off — one voice
+byok-cast-mode-sentence =
+    .label = Sentence
+byok-cast-mode-paragraph =
+    .label = Paragraph
+byok-cast-mode-page =
+    .label = Page
+byok-cast-mode-section =
+    .label = Section (at each heading)
+byok-cast-add =
+    .label = Add voice to rotation
+byok-cast-empty = No voices in the rotation.
+byok-cast-needs-two = Add a second voice — one voice cannot alternate with itself.
+byok-cast-tags-hint = Speaker tags still win where a document has them, and skipped passages do not use up a turn. The order below is the order the voices take.
+
 ## Status messages
 
 byok-msg-loading-voices = Loading voices…

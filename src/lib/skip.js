@@ -70,7 +70,7 @@ Zotero.BYOKTTS.Skip = new function () {
 	this.ensureStats = async function () {
 		if (this.stats) return this.stats;
 		if (_analyzing) return _analyzing;
-		_analyzing = (async () => {
+		let run = (async () => {
 			try {
 				let reader = this._findReader();
 				if (!reader) throw new Error('No open reader to measure');
@@ -92,11 +92,19 @@ Zotero.BYOKTTS.Skip = new function () {
 				Zotero.debug('BYOK TTS: could not measure document — ' + this.lastAnalyzeError);
 				return null;
 			}
-			finally {
-				_analyzing = null;
-			}
 		})();
-		return _analyzing;
+		_analyzing = run;
+		/*
+			Cleared here rather than in a finally inside the run: a body that reaches its end without
+			suspending settles before the assignment above, so the finally would null a variable that
+			is then immediately set again — leaving a resolved promise in place for good, after which
+			every later call short-circuits on it and no document is ever measured a second time. The
+			identity check keeps a newer run from being cleared by an older one.
+		*/
+		run.finally(() => {
+			if (_analyzing === run) _analyzing = null;
+		});
+		return run;
 	};
 
 	// Fallbacks for when prefs.js defaults were not registered — reinstalling over the same

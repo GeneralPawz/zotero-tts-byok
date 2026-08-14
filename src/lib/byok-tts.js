@@ -200,6 +200,11 @@ Zotero.BYOKTTS = new function () {
 			if (this.Skip && this.Skip.anyOn() && !this.Skip.stats) {
 				await this.Skip.ensureStats();
 			}
+			// Casting numbers the whole document up front, so the voice a paragraph is read
+			// in does not depend on the route the reader took to reach it
+			if (this.Cast?.enabled()) {
+				await this.Cast.ensureIndex();
+			}
 			let result = this.Skip
 				? this.Skip.apply(segment, 'playback')
 				: { text: String(segment?.text ?? '') };
@@ -215,7 +220,7 @@ Zotero.BYOKTTS = new function () {
 		}
 
 		// A leading [Name] hands the line to that character's voice
-		let speaker = this.matchSpeaker(text);
+		let speaker = this.matchSpeaker(text, segment);
 		if (speaker) {
 			voice = speaker.voice;
 			locale = voice.locales[0];
@@ -335,7 +340,7 @@ Zotero.BYOKTTS = new function () {
 	 *
 	 * @return {{voice: Object, text: String}|null}
 	 */
-	this.matchSpeaker = function (text) {
+	this.matchSpeaker = function (text, segment) {
 		let speakers = this.getSpeakers();
 		let voices = this.getVoices();
 		let match = /^\s*\[([^\]]+)\]\s*/.exec(text);
@@ -348,6 +353,12 @@ Zotero.BYOKTTS = new function () {
 				if (voice) return { voice, text: text.slice(match[0].length) };
 			}
 		}
+
+		// Nothing claimed this line. A document that carries no tags at all can still be given
+		// more than one voice by rotating them over its structure, which is what most documents
+		// need — a standard cannot be tagged for a cast that was never written into it.
+		let cast = this.Cast?.voiceFor(segment);
+		if (cast) return { voice: cast, text };
 
 		// Everything not claimed by a speaker — narration, headings — can have a voice of its
 		// own, so a story reads as a narrator plus its characters rather than one voice doing
