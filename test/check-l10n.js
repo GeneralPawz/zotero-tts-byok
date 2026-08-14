@@ -29,6 +29,15 @@ for (let m of js.matchAll(/setAttributes\([^)]*\?\s*'([^']+)'\s*:\s*'([^']+)'/g)
 	used.add(m[2]);
 }
 
+/*
+	Ids the script holds in a table and resolves through a variable — the emotion group
+	headings, for instance — cannot be tied to a call site by pattern matching. Every byok-
+	literal in the script counts as a reference for the dead-string check, but not as a demand
+	that the string exist, since this set also sweeps up element ids and class names.
+*/
+const referenced = new Set(used);
+for (let m of js.matchAll(/'(byok-[a-zA-Z0-9-]+)'/g)) referenced.add(m[1]);
+
 /* Parse each locale */
 function parseFtl(file) {
 	const entries = new Map();
@@ -75,7 +84,7 @@ for (let id of needsLabel) {
 /* Dead strings, and locales drifting apart */
 for (let [locale, entries] of parsed) {
 	for (let id of entries.keys()) {
-		if (!used.has(id)) fail(`${locale}: "${id}" is defined but never used`);
+		if (!referenced.has(id)) fail(`${locale}: "${id}" is defined but never used`);
 	}
 	if (locale === 'en-US') continue;
 	for (let id of reference.keys()) {

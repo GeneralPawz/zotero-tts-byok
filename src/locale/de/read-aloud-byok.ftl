@@ -159,13 +159,21 @@ byok-copy-message =
     .label = Meldung kopieren
 byok-copied = Kopiert
 
-byok-jump-test =
-    .label = Stimme testen
 byok-about-heading = Über
 byok-about-license = Read Aloud BYOK — MIT-Lizenz. github.com/GeneralPawz/zotero-tts-byok
-byok-sticky-ok = Letzter Test erfolgreich
-byok-sticky-error = Letzte Aktion meldete ein Problem
 byok-version-line = Plugin { $plugin } · Zotero { $zotero }
+
+byok-jump-output =
+    .label = Ausgabe ⤓
+byok-emotion-label = Emotions-Tag einfügen
+byok-emotion-placeholder = Auswählen …
+byok-emotion-hint = Wird an der Cursorposition eingefügt. Die Tags werden als Vortragsanweisung gelesen und nicht mitgesprochen; sie wirken im Prompt oben ebenso wie im Text eines Dokuments.
+byok-emotion-group-amusement = Belustigung
+byok-emotion-group-joy = Freude
+byok-emotion-group-yearning = Sehnsucht
+byok-emotion-group-surprise = Überraschung
+byok-emotion-group-displeasure = Unmut
+byok-emotion-group-delivery = Vortrag
 
 ## Statusmeldungen
 

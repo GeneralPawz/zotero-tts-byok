@@ -159,13 +159,21 @@ byok-copy-message =
     .label = Copy message
 byok-copied = Copied
 
-byok-jump-test =
-    .label = Test voice
 byok-about-heading = About
 byok-about-license = Read Aloud BYOK — MIT licensed. github.com/GeneralPawz/zotero-tts-byok
-byok-sticky-ok = Last test succeeded
-byok-sticky-error = Last action reported a problem
 byok-version-line = Plugin { $plugin } · Zotero { $zotero }
+
+byok-jump-output =
+    .label = Output ⤓
+byok-emotion-label = Insert emotion tag
+byok-emotion-placeholder = Choose…
+byok-emotion-hint = Inserted at the cursor. These read as performance direction rather than being spoken; they work in the prompt above and equally inside a document’s own text.
+byok-emotion-group-amusement = Amusement
+byok-emotion-group-joy = Joy
+byok-emotion-group-yearning = Yearning
+byok-emotion-group-surprise = Surprise
+byok-emotion-group-displeasure = Displeasure
+byok-emotion-group-delivery = Delivery
 
 ## Status messages
 

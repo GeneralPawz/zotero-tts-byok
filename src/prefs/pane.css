@@ -34,19 +34,28 @@
 	border-bottom: 1px solid var(--material-border-quinary, rgba(128, 128, 128, .25));
 }
 
-#byok-jump-test {
+#byok-test-sticky {
 	font-weight: 600;
 	border-inline-start: 3px solid transparent;
 }
 
-#byok-jump-test.byok-state-ok {
+#byok-test-sticky.byok-state-ok {
 	border-inline-start-color: var(--accent-green, #39bf68);
 	color: var(--accent-green, #39bf68);
 }
 
-#byok-jump-test.byok-state-error {
+#byok-test-sticky.byok-state-error {
 	border-inline-start-color: var(--accent-red, #db2c3a);
 	color: var(--accent-red, #db2c3a);
+}
+
+#byok-sticky-summary {
+	flex: 1;
+	min-width: 0;
+}
+
+.byok-emotion-picker {
+	min-width: 14em;
 }
 
 #byok-status {

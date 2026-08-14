@@ -36,7 +36,10 @@ function loadPane({ prefs, controls }) {
 			disabled: false,
 			classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(...c) { c.forEach(x => this._s.delete(x)); }, toggle(c, on) { on ? this._s.add(c) : this._s.delete(c); }, contains(c) { return this._s.has(c); } },
 			children: [],
+			_events: [],
 			addEventListener() {},
+			dispatchEvent(e) { this._events.push(e.type); return true; },
+			setSelectionRange(a, b) { this.selectionStart = a; this.selectionEnd = b; },
 			append() {},
 			replaceChildren() {},
 			removeAttribute() {},
@@ -49,6 +52,7 @@ function loadPane({ prefs, controls }) {
 		return node;
 	};
 	const document = {
+		createEvent: () => ({}),
 		getElementById: (id) => {
 			if (!elements.has(id)) elements.set(id, make(id));
 			return elements.get(id);
@@ -58,6 +62,7 @@ function loadPane({ prefs, controls }) {
 	};
 	const sandbox = {
 		document,
+		Event: class { constructor(type, init) { this.type = type; Object.assign(this, init); } },
 		window: { MozXULElement: { insertFTLIfNeeded() {} } },
 		setTimeout: () => {},
 		Zotero: {
@@ -73,6 +78,12 @@ function loadPane({ prefs, controls }) {
 }
 
 const P = 'extensions.zotero.byokTTS.';
+
+/** Flatten the shipping emotion table so the tags themselves can be checked. */
+function pane_EMOTION_TAGS() {
+	let { pane } = loadPane({ prefs: {}, controls: {} });
+	return pane.EMOTIONS.flatMap(([, tags]) => tags.map(t => `[${t}]`));
+}
 
 console.log('\nvoices view follows the control, not the stale preference');
 {
@@ -131,7 +142,7 @@ console.log('\nprovider rows follow the control too');
 console.log('\nsticky button reflects the last outcome');
 {
 	let { pane, document } = loadPane({ prefs: {}, controls: {} });
-	let button = document.getElementById('byok-jump-test');
+	let button = document.getElementById('byok-test-sticky');
 	pane.setState('idle');
 	check('starts idle', button.classList.contains('byok-state-idle'), true);
 	pane.status('Playing 42 KB…', false);
@@ -145,6 +156,49 @@ console.log('\nsticky button reflects the last outcome');
 		button.classList.contains('byok-state-error'), true);
 	check('output panel hidden when empty',
 		document.getElementById('byok-status-box').hidden, true);
+}
+
+console.log('\nemotion tags insert at the cursor');
+{
+	let { pane, document } = loadPane({ prefs: {}, controls: {} });
+	let area = document.getElementById('byok-style-prompt');
+
+	area.value = '';
+	area.selectionStart = area.selectionEnd = 0;
+	pane.insertStyleTag('[joyful]');
+	check('into an empty prompt', area.value, '[joyful]');
+
+	area.value = 'Read this calmly.';
+	area.selectionStart = area.selectionEnd = area.value.length;
+	pane.insertStyleTag('[whispering]');
+	check('appended with one space', area.value, 'Read this calmly. [whispering]');
+
+	area.value = 'Read this calmly.';
+	area.selectionStart = area.selectionEnd = 5;
+	pane.insertStyleTag('[angry]');
+	check('mid-sentence, spaced on both sides', area.value, 'Read [angry] this calmly.');
+
+	area.value = 'Read  calmly.';
+	area.selectionStart = area.selectionEnd = 5;
+	pane.insertStyleTag('[bitter]');
+	check('no double spacing where one already exists', area.value, 'Read [bitter] calmly.');
+
+	area.value = 'Replace me';
+	area.selectionStart = 0;
+	area.selectionEnd = area.value.length;
+	pane.insertStyleTag('[silly]');
+	check('a selection is replaced', area.value, '[silly]');
+
+	check('the preference binding is notified', area._events.includes('input'), true);
+}
+
+{
+	let { pane } = loadPane({ prefs: {}, controls: {} });
+	let tags = pane.EMOTIONS.flatMap(([, group]) => group.map(t => `[${t}]`));
+	check('every tag is bracketed and lowercase', tags.every(t => /^\[[a-z]+\]$/.test(t)), true);
+	check('no duplicates across groups', new Set(tags).size, tags.length);
+	check('groups are named by an l10n id',
+		pane.EMOTIONS.every(([id]) => id.startsWith('byok-emotion-group-')), true);
 }
 
 console.log(problems ? `\n${problems} problem(s)` : '\npane logic behaves');

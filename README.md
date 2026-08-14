@@ -230,9 +230,12 @@ OpenRouter.
 
 ### Inline emotion tags
 
-Gemini reads bracketed tags inside your own text as performance direction rather than speaking
-them. These have been tested and work; they are ordinary English words, so spelling matters more
-than the brackets do.
+Gemini reads bracketed tags as performance direction rather than speaking them. They work in the
+style prompt and equally inside a document's own text. The **Insert emotion tag** picker under the
+prompt offers the tested set, grouped as below, and drops the choice in at the cursor.
+
+These have been tested and work; they are ordinary English words, so spelling matters more than
+the brackets do.
 
 | Register | Tags |
 | --- | --- |
@@ -390,6 +393,14 @@ node test/check-pane.js      pane logic: view toggles, row visibility, status st
 The skip fixtures are an academic paper and a furniture-heavy standards page with a library
 watermark whose text extraction mangles differently on every page. Every case came from a bug;
 they should stay passing.
+
+## The test bar
+
+A bar pinned to the top of the settings pane carries **Speak a test phrase**, which plays the
+first configured voice with whatever is currently set — so a style prompt or an emotion tag can be
+tried repeatedly without leaving the section being edited. It turns green after a success and red
+after a failure, with the gist of the result beside it. **Output ⤓** jumps to Maintenance, where
+the full message and the copy button live; nothing drags you there on its own.
 
 ## Settings
 

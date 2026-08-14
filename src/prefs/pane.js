@@ -69,6 +69,7 @@ var Zotero_BYOK_TTS = {
 		}
 
 		this.bindVoiceEditor();
+		await this.buildEmotionPicker();
 		this.onProviderChange(true);
 		this.refreshLogPath();
 
@@ -112,28 +113,24 @@ var Zotero_BYOK_TTS = {
 		elem.value = message || '';
 		elem.classList.toggle('byok-error', !!isError);
 		if (box) box.hidden = !message;
-		if (message) this.setState(isError ? 'error' : 'ok');
+		if (message) this.setState(isError ? 'error' : 'ok', message);
 	},
 
 	/**
-	 * Colour the sticky button by the last outcome, so a problem is visible from anywhere on
-	 * the page without the output panel having to be open.
+	 * Colour the sticky button by the last outcome and put the gist beside it, so a run started
+	 * from up here reports back without dragging the reader down to the output panel.
 	 */
-	setState(state) {
-		let button = document.getElementById('byok-jump-test');
+	setState(state, message) {
+		let button = document.getElementById('byok-test-sticky');
 		let summary = document.getElementById('byok-sticky-summary');
-		if (!button) return;
-		button.classList.remove('byok-state-idle', 'byok-state-ok', 'byok-state-error');
-		button.classList.add('byok-state-' + state);
+		if (button) {
+			button.classList.remove('byok-state-idle', 'byok-state-ok', 'byok-state-error');
+			button.classList.add('byok-state-' + state);
+		}
 		if (!summary) return;
-		if (state === 'idle') {
-			summary.removeAttribute('data-l10n-id');
-			summary.textContent = '';
-		}
-		else {
-			document.l10n.setAttributes(summary,
-				state === 'ok' ? 'byok-sticky-ok' : 'byok-sticky-error');
-		}
+		let firstLine = String(message || '').split('\n')[0];
+		summary.textContent = firstLine.length > 110 ? firstLine.slice(0, 110) + '…' : firstLine;
+		summary.classList.toggle('byok-error', state === 'error');
 	},
 
 	/** Scroll to the test controls and leave focus there. */
@@ -156,6 +153,69 @@ var Zotero_BYOK_TTS = {
 			setTimeout(() => document.l10n.setAttributes(button, 'byok-copy-message'), 1500);
 			void previous;
 		}
+	},
+
+	/* ------------------------------------------------------- speaking style */
+
+	/**
+	 * Tags that have been tried and behave. They are English words the model reads as direction
+	 * rather than speaking, so the text is never translated — only the group headings are.
+	 */
+	EMOTIONS: [
+		['byok-emotion-group-amusement', ['laughing', 'silly', 'hysterical']],
+		['byok-emotion-group-joy', ['joyful', 'delighted', 'thrilled', 'ecstatic']],
+		['byok-emotion-group-yearning', ['longing', 'lust']],
+		['byok-emotion-group-surprise', ['surprised', 'startled', 'flabbergasted']],
+		['byok-emotion-group-displeasure', ['annoyed', 'bitter', 'angry', 'hostile', 'disgusted']],
+		['byok-emotion-group-delivery', ['whispering']]
+	],
+
+	async buildEmotionPicker() {
+		let select = document.getElementById('byok-emotion-picker');
+		if (!select) return;
+		select.replaceChildren();
+
+		let placeholder = document.createElement('option');
+		placeholder.value = '';
+		placeholder.textContent = await this.msg('byok-emotion-placeholder');
+		select.append(placeholder);
+
+		for (let [groupId, tags] of this.EMOTIONS) {
+			let group = document.createElement('optgroup');
+			group.label = await this.msg(groupId);
+			for (let tag of tags) {
+				let option = document.createElement('option');
+				option.value = `[${tag}]`;
+				option.textContent = `[${tag}]`;
+				group.append(option);
+			}
+			select.append(group);
+		}
+
+		select.addEventListener('change', () => {
+			if (select.value) this.insertStyleTag(select.value);
+			select.selectedIndex = 0;
+		});
+	},
+
+	/** Drop a tag in at the cursor and let the preference binding pick the change up. */
+	insertStyleTag(tag) {
+		let area = document.getElementById('byok-style-prompt');
+		if (!area) return;
+		let text = area.value || '';
+		let start = area.selectionStart ?? text.length;
+		let end = area.selectionEnd ?? text.length;
+		// Keep words apart without piling up spaces when inserting mid-sentence
+		let before = text.slice(0, start);
+		let after = text.slice(end);
+		let lead = before && !/\s$/.test(before) ? ' ' : '';
+		let trail = after && !/^\s/.test(after) ? ' ' : '';
+		area.value = before + lead + tag + trail + after;
+		let caret = (before + lead + tag).length;
+		area.setSelectionRange?.(caret, caret);
+		// 'input' is what Zotero listens for to write the preference
+		area.dispatchEvent(new Event('input', { bubbles: true }));
+		area.focus();
 	},
 
 	/* ------------------------------------------------------------- voices */

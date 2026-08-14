@@ -1,8 +1,14 @@
 <vbox onload="event.waitUntil(Zotero.BYOKTTS.pane.init())">
-	<!-- Stays in view while scrolling; shows the last result and jumps to the test controls -->
+	<!--
+		Stays in view while scrolling. The first button plays straight away so a style prompt
+		can be tried repeatedly without leaving the section being edited; the second is there
+		for when the full output is wanted.
+	-->
 	<hbox id="byok-sticky" align="center">
-		<button id="byok-jump-test" class="byok-state-idle"
-			data-l10n-id="byok-jump-test"
+		<button id="byok-test-sticky" class="byok-state-idle"
+			data-l10n-id="byok-test-now"
+			oncommand="Zotero.BYOKTTS.pane.test()"/>
+		<button id="byok-jump-output" data-l10n-id="byok-jump-output"
 			oncommand="Zotero.BYOKTTS.pane.jumpToTest()"/>
 		<description id="byok-sticky-summary" class="byok-hint"/>
 	</hbox>
@@ -181,6 +187,12 @@
 
 		<html:textarea id="byok-style-prompt" rows="3" class="byok-wide"
 			preference="extensions.zotero.byokTTS.stylePrompt"/>
+
+		<hbox align="center">
+			<label data-l10n-id="byok-emotion-label" control="byok-emotion-picker"/>
+			<html:select id="byok-emotion-picker" class="byok-emotion-picker"/>
+		</hbox>
+		<description class="byok-hint" data-l10n-id="byok-emotion-hint"/>
 
 		<hbox align="center">
 			<label data-l10n-id="byok-style-mode" control="byok-style-mode"/>
