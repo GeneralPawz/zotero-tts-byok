@@ -152,3 +152,27 @@ What exists in the meantime:
 Both registries read the same `update.json` this repository already publishes, so the plugin is
 ready to be listed as soon as an entry is submitted. They are expected to fold into the official
 directory when it arrives.
+
+## Branches
+
+Two branches, and the distinction is what reaches other people's installs.
+
+| Branch | Role |
+| --- | --- |
+| `main` | Stable and the default. Every release is tagged here, and `update.json` on `main` is what Zotero polls — so anything merged here is on its way to every install |
+| `dev` | Where work lands first, and is tested before it goes anywhere near `main` |
+
+The cycle:
+
+1. Work is committed to `dev`. CI runs there, so a broken build is caught without shipping.
+2. A build from `dev` is installed and tried by hand. Nothing is released at this point.
+3. Once it is confirmed working, `dev` is merged into `main` and the merge is tagged `vX.Y.Z`.
+4. The release workflow builds the tag, publishes the release, and points `update.json` at it.
+
+Step 4 refuses to run for a tag that is not an ancestor of `main`. Tagging `dev` by mistake would
+otherwise publish a release and advertise it through `update.json` to everyone, which is precisely
+the accident the split exists to prevent.
+
+A dev build carries the version it will be released under, so installing it over the current
+release is an upgrade and the eventual release does not try to reinstall it.
+

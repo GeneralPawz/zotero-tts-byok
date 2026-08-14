@@ -24,11 +24,10 @@ Zotero.BYOKTTS.ReaderUI = new function () {
 
 	// Sliders, not a speaker: this configures reading, it does not start it. Sized and coloured
 	// like the reader's own toolbar icons so it sits with them rather than beside them.
-	const ICON = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">'
-		+ '<path fill="currentColor" fill-rule="evenodd" d="M13 4.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5'
+	const ICON_PATH = 'M13 4.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5'
 		+ 'm1.9-.125a2 2 0 0 1-3.8 0H2v-1.25h9.1a2 2 0 0 1 3.8 0H18v1.25zM7 10.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5'
 		+ 'm1.9-.125a2 2 0 0 1-3.8 0H2v-1.25h3.1a2 2 0 0 1 3.8 0H18v1.25zM13 16.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5'
-		+ 'm1.9-.125a2 2 0 0 1-3.8 0H2v-1.25h9.1a2 2 0 0 1 3.8 0H18v1.25z" clip-rule="evenodd"/></svg>';
+		+ 'm1.9-.125a2 2 0 0 1-3.8 0H2v-1.25h9.1a2 2 0 0 1 3.8 0H18v1.25z';
 
 	const STYLE = `
 		#${PANEL_ID} {
@@ -316,20 +315,6 @@ Zotero.BYOKTTS.ReaderUI = new function () {
 
 	/* ----------------------------------------------------------------- panel */
 
-	this._buildPanel = function (doc, reader) {
-		let panel = doc.createElement('div');
-		panel.id = PANEL_ID;
-		panel.hidden = true;
-
-		let refresh = () => {
-			let open = !panel.hidden;
-			this._fill(doc, panel, reader, refresh);
-			panel.hidden = !open;
-		};
-		this._fill(doc, panel, reader, refresh);
-		return panel;
-	};
-
 	this._fill = function (doc, panel, reader, refresh) {
 		let DocPrefs = Zotero.BYOKTTS.DocPrefs;
 		let Skip = Zotero.BYOKTTS.Skip;
@@ -411,50 +396,117 @@ Zotero.BYOKTTS.ReaderUI = new function () {
 		(doc.head || doc.documentElement).append(style);
 	};
 
+	/**
+		Zotero wipes this toolbar section and re-fires the event on every render, and its append()
+		throws unless it is called synchronously inside the handler. So the button is created and
+		appended before anything else happens: the panel is expensive to build and touches voices,
+		items and preferences, and any failure in that work must not cost us the button — which is
+		exactly how the button came to be missing in 1.14.0.
+	*/
 	this._addButton = function (event) {
 		let { doc, reader, append } = event;
-		if (!doc || doc.getElementById(BUTTON_ID)) return;
-		this._injectStyle(doc);
+		if (!doc || typeof append !== 'function') return;
 
 		let button = doc.createElement('button');
 		button.id = BUTTON_ID;
-		// Zotero's own toolbar buttons carry this class; matching it inherits their sizing,
-		// hover and active states rather than approximating them
+		// Zotero's own toolbar buttons carry this class, so sizing, hover and active states
+		// are inherited rather than approximated
 		button.className = 'toolbar-button';
 		button.title = this._string('byok-doc-heading');
 		button.tabIndex = -1;
-		button.innerHTML = ICON;
+		button.append(this._icon(doc));
+		append(button);
 
-		let panel = this._buildPanel(doc, reader);
+		// Everything below is best-effort; the button is already in the toolbar
+		try {
+			this._injectStyle(doc);
+			button.addEventListener('click', (e) => {
+				e.stopPropagation();
+				this._toggle(doc, reader, button);
+			});
+			Zotero.BYOKTTS.Log?.write('toolbar', { ok: true, scope: Zotero.BYOKTTS.DocPrefs.scopeFor(reader) });
+		}
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.BYOKTTS.Log?.write('toolbar', { ok: false, error: e.message || String(e) });
+		}
+	};
+
+	/* Built as nodes rather than innerHTML: assigning markup from a privileged context into the
+	   reader's document is the kind of thing that works until a Firefox uplift decides it does not. */
+	this._icon = function (doc) {
+		const NS = 'http://www.w3.org/2000/svg';
+		let svg = doc.createElementNS(NS, 'svg');
+		svg.setAttribute('width', '20');
+		svg.setAttribute('height', '20');
+		svg.setAttribute('viewBox', '0 0 20 20');
+		svg.setAttribute('fill', 'none');
+		svg.setAttribute('aria-hidden', 'true');
+		let path = doc.createElementNS(NS, 'path');
+		path.setAttribute('fill', 'currentColor');
+		path.setAttribute('fill-rule', 'evenodd');
+		path.setAttribute('clip-rule', 'evenodd');
+		path.setAttribute('d', ICON_PATH);
+		svg.append(path);
+		return svg;
+	};
+
+	/** One panel per reader document, built the first time it is actually wanted. */
+	this._panelFor = function (doc, reader) {
+		let panel = doc.getElementById(PANEL_ID);
+		if (panel) return panel;
+		panel = doc.createElement('div');
+		panel.id = PANEL_ID;
+		panel.hidden = true;
 		doc.body.append(panel);
 
 		let close = (e) => {
 			if (panel.hidden) return;
-			if (e && (panel.contains(e.target) || button.contains(e.target))) return;
+			let button = doc.getElementById(BUTTON_ID);
+			if (e && (panel.contains(e.target) || button?.contains(e.target))) return;
 			panel.hidden = true;
-			button.classList.remove('active');
+			button?.classList.remove('active');
 		};
-		button.addEventListener('click', (e) => {
-			e.stopPropagation();
-			if (panel.hidden) {
-				this._fill(doc, panel, reader, () => this._fill(doc, panel, reader, () => {}));
-				let rect = button.getBoundingClientRect();
-				panel.style.top = `${Math.round(rect.bottom + 4)}px`;
-				// Kept inside the window when the button sits near the right edge
-				let left = Math.min(rect.left, doc.documentElement.clientWidth - 332);
-				panel.style.left = `${Math.round(Math.max(8, left))}px`;
-				panel.hidden = false;
-				button.classList.add('active');
-				this._analyze(reader);
-			}
-			else {
-				close();
-			}
-		});
 		doc.addEventListener('click', close);
 		doc.addEventListener('keydown', e => e.key === 'Escape' && close());
+		return panel;
+	};
 
-		append(button);
+	this._toggle = function (doc, reader, button) {
+		let panel;
+		try {
+			panel = this._panelFor(doc, reader);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return;
+		}
+		if (!panel.hidden) {
+			panel.hidden = true;
+			button.classList.remove('active');
+			return;
+		}
+		let refresh = () => this._fill(doc, panel, reader, refresh);
+		try {
+			refresh();
+		}
+		catch (e) {
+			// A panel that cannot be built should say so rather than opening blank
+			Zotero.logError(e);
+			panel.replaceChildren();
+			let note = doc.createElement('div');
+			note.className = 'byok-note';
+			note.textContent = String(e.message || e);
+			panel.append(note);
+		}
+		let rect = button.getBoundingClientRect();
+		panel.style.top = `${Math.round(rect.bottom + 4)}px`;
+		// Kept inside the window when the button sits near the right edge
+		let left = Math.min(rect.left, doc.documentElement.clientWidth - 332);
+		panel.style.left = `${Math.round(Math.max(8, left))}px`;
+		panel.hidden = false;
+		button.classList.add('active');
+		this._analyze(reader);
 	};
 
 	/* ------------------------------------------------------ document measuring */
