@@ -4,7 +4,7 @@ Leaving out titles, running heads, footnotes, tables, formulas, citations, URLs 
 
 [← Read Aloud BYOK](../README.md)
 
-![Skip rules](../images/settings-skip.png)
+![Skip rules](../media/settings-skip.png)
 
 A **Skip** row is added to the reader's Read Aloud popup; clicking it reveals toggles for what to
 leave out. The same toggles are mirrored in this plugin's preferences pane.

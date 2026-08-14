@@ -124,7 +124,7 @@ a remove button — and is the one to use if JSON is not your thing. **JSON** is
 with syntax highlighting, for pasting a whole set at once. Both write the same setting, so you can
 switch between them freely.
 
-![Voices, list view](../images/settings-voices.png)
+![Voices, list view](../media/settings-voices.png)
 
 ```json
 [

@@ -15,7 +15,7 @@ Speechify, Azure Speech, Google Gemini TTS, or any custom endpoint. Adds a **Ski
 reader for leaving out titles, running heads, footnotes, tables, formulas, citations, URLs and
 bracketed asides — and stitches sentences broken across a page break back together.
 
-![Provider settings, with the test bar reporting a successful run](images/settings-provider.png)
+![Provider settings, with the test bar reporting a successful run](media/settings-provider.png)
 
 ## Install 🚀
 
@@ -26,7 +26,7 @@ In Zotero: **Tools → Plugins**, then the gear icon → **Install Plugin From F
 `.xpi`. Open **Edit → Settings → Read Aloud BYOK** to configure it; the **About** section at the
 foot of the pane shows which build is actually running.
 
-![Zotero's plugin manager, with the gear menu open](images/plugins-manager.png)
+![Zotero's plugin manager, with the gear menu open](media/plugins-manager.png)
 
 > [!TIP]
 > If a PDF tab is already open, close and reopen it — the voice list is fetched when the reader
@@ -73,8 +73,11 @@ It uses every one of the eighteen tested emotion tags at least once, and its dia
 for two characters, so configuring speakers named `Mara` and `Theo` plus a voice for untagged text
 gives you a narrator and a cast rather than one voice reading everything.
 
-**[Watch that working](images/multi-speaker.mp4)** — half a minute of the scene read by three
-voices, with sound. [Speaking style](docs/speaking-style.md) explains how to set it up.
+![The speaking test being read, highlighting following the narration](media/multi-speaker.gif)
+
+The clip above is silent, and the voices are the point — **[watch it with
+sound](media/multi-speaker.mp4)** (30 seconds). [Speaking style](docs/speaking-style.md) explains
+how to set it up.
 
 ## How it works, briefly 🔍
 

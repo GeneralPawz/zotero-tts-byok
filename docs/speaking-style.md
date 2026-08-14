@@ -4,7 +4,7 @@ Directing how the text is delivered: style prompts, inline emotion tags, and a v
 
 [← Read Aloud BYOK](../README.md)
 
-![Speaking style](../images/settings-style.png)
+![Speaking style](../media/settings-style.png)
 
 Expressive models take direction in natural language. Gemini's convention is to put it in the text
 itself — `Say cheerfully: Have a wonderful day!` — and it also honours inline tags like
@@ -58,12 +58,12 @@ itself is not read out:
 [Theo] [silly] “Would you believe I’m a highly trained pastry inspector?”
 ```
 
-![Speakers](../images/settings-speakers.png)
+![Speakers](../media/settings-speakers.png)
 
 > [!NOTE]
-> **[Watch it working](../images/multi-speaker.mp4)** — half a minute of the speaking test being
+> **[Watch it working](../media/multi-speaker.mp4)** — half a minute of the speaking test being
 > read by a narrator and two characters. The recording has sound, which is rather the point.
-> GitHub opens `.mp4` files in a player; the file is also in the repository under `images/`.
+> GitHub opens `.mp4` files in a player; the file is also in the repository under `media/`.
 
 #### Setting it up
 

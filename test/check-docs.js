@@ -34,19 +34,19 @@ for (const page of pages) {
 			fail(`${page}: ${target} does not exist`);
 			continue;
 		}
-		if (/\.(png|jpg|svg)$/i.test(target)) {
+		if (/\.(png|jpg|svg|gif|mp4)$/i.test(target)) {
 			referenced.add(path.relative(ROOT, resolved).replace(/\\/g, '/'));
 		}
 	}
 	console.log(`  ${page.padEnd(24)} ${links} local link(s)`);
 }
 
-/* An unreferenced image is either a leftover or a page that forgot to include it */
-const images = fs.readdirSync(path.join(ROOT, 'images'))
-	.filter(name => /\.(png|jpg|svg)$/i.test(name))
-	.map(name => `images/${name}`);
-for (const image of images) {
-	if (!referenced.has(image)) console.log(`  note: ${image} is not referenced anywhere`);
+/* An unreferenced asset is either a leftover or a page that forgot to include it */
+const assets = fs.readdirSync(path.join(ROOT, 'media'))
+	.filter(name => /\.(png|jpg|svg|gif|mp4)$/i.test(name))
+	.map(name => `media/${name}`);
+for (const asset of assets) {
+	if (!referenced.has(asset)) console.log(`  note: ${asset} is not referenced anywhere`);
 }
 
 /* Every docs page should lead back, or the split leaves dead ends */

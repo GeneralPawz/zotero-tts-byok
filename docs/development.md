@@ -36,7 +36,7 @@ test/           node checks, not packaged
   fixtures/     speaking-test.txt, the emotion tag scene
 scripts/        make-update-manifest.mjs, make-speaking-test.mjs
 .github/        CI on every push, release on every v* tag
-images/         README screenshots
+media/          screenshots and recordings
 target/         build output, gitignored
 ```
 
@@ -70,6 +70,23 @@ The skip fixtures are an academic paper and a furniture-heavy standards page wit
 watermark whose text extraction mangles differently on every page. Every case came from a bug;
 they should stay passing.
 
+## Media
+
+Screenshots and recordings live in `media/`. Screenshots are rendered rather than captured — see
+below — and a screen recording is reduced with ffmpeg before it is committed:
+
+```bash
+# 1674x900 source down to a committable size, audio kept
+ffmpeg -i raw.mp4 -vf scale=1280:-2 -c:v libx264 -crf 28 -preset slow   -pix_fmt yuv420p -c:a aac -b:a 96k -movflags +faststart media/multi-speaker.mp4
+
+# a short silent excerpt, for the inline embed a README can actually show
+ffmpeg -ss 9 -t 12 -i media/multi-speaker.mp4   -vf "fps=10,scale=760:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4"   -loop 0 media/multi-speaker.gif
+```
+
+That took the recording from 6.3 MB to 824 KB with the audio intact, and the excerpt to 576 KB.
+GitHub strips `<video>` from markdown and does not embed repository `.mp4` files, so anything
+shown inline has to be a GIF, with the video linked beside it for the sound.
+
 ## Screenshots
 
 The images in this README are rendered from the pane's own sources rather than captured from a
@@ -77,7 +94,7 @@ running Zotero, using [zotero-plugin-ui-sim](https://github.com/GeneralPawz/zote
 
 ```
 node scripts/sync-plugin.mjs read-aloud-byok D:/projects/zotero-tts-byok
-node scripts/capture.mjs read-aloud-byok --out D:/projects/zotero-tts-byok/images
+node scripts/capture.mjs read-aloud-byok --out D:/projects/zotero-tts-byok/media
 ```
 
 It reads this plugin's real `pane.xhtml`, `pane.css` and `.ftl`, so a layout change shows up in

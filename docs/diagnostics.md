@@ -17,7 +17,7 @@ of your own in place of the built-in sample — useful for hearing one emotion t
 
 ## Diagnostic log
 
-![Logging](../images/settings-logging.png)
+![Logging](../media/settings-logging.png)
 
 **Write a diagnostic log (JSONL)** in the preferences pane appends one JSON object per line to
 `byok-tts.jsonl` in the Zotero profile. Off by default. It records:
